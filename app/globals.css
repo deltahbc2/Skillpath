@@ -24,3 +24,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.bg-default-100{
+  background-color: #5cbb80;
+}
+
+.text-default-100{
+  color: #5cbb80;
+}
+
+.bg-default-300{
+  background-color: #30aa85;
+}
+
+.text-default-300{
+  color: #30aa85;
+}
+
+.bg-default-500{
+  background-color: #009388;
+}
+
+.text-default-500{
+  color: #009388;
+}
+
+.bg-default-700{
+  background-color: #007781;
+}
+
+.text-default-700{
+  color: #007781;
+}
+
+.bg-default-900{
+  background-color: #225f71;
+}
+
+.text-default-900{
+  color: #225f71;
+}
