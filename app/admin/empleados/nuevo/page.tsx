@@ -1,0 +1,302 @@
+"use client";
+
+import { ChangeEvent, useEffect, useState } from "react";
+
+const skillOptions = [
+    "React",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "TypeScript",
+    "Next.js",
+    "Node.js",
+    "Tailwind",
+    "Git",
+    "SQL",
+];
+
+const skillMatchers: Record<string, RegExp[]> = {
+    React: [/\breact(?:\.js)?\b/i],
+    HTML: [/\bhtml(?:5)?\b/i],
+    CSS: [/\bcss(?:3)?\b/i, /\bsass\b/i, /\bscss\b/i],
+    JavaScript: [/\bjavascript\b/i, /\becmascript\b/i, /\bjs\b/i],
+    TypeScript: [/\btypescript\b/i, /\bts\b/i],
+    "Next.js": [/\bnext(?:\.js)?\b/i],
+    "Node.js": [/\bnode(?:\.js)?\b/i, /\bexpress\b/i],
+    Tailwind: [/\btailwind(?:css)?\b/i],
+    Git: [/\bgit\b/i, /\bgithub\b/i, /\bgitlab\b/i],
+    SQL: [/\bsql\b/i, /\bpostgres(?:ql)?\b/i, /\bmysql\b/i, /\bsqlite\b/i],
+};
+
+const detectSkillsFromText = (text: string) => {
+    if (!text.trim()) {
+        return [];
+    }
+
+    return skillOptions.filter((skill) => {
+        const patterns = skillMatchers[skill] ?? [];
+        return patterns.some((pattern) => pattern.test(text));
+    });
+};
+
+const nuevoEmpleadoPage = () => {
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [pdfError, setPdfError] = useState<string>("");
+    const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+    const [isExtractingSkills, setIsExtractingSkills] = useState<boolean>(false);
+    const [skillsError, setSkillsError] = useState<string>("");
+    const [photoFile, setPhotoFile] = useState<File | null>(null);
+    const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("user.png");
+
+    useEffect(() => {
+        if (!pdfFile) {
+            setPreviewUrl("");
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(pdfFile);
+        setPreviewUrl(objectUrl);
+
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [pdfFile]);
+
+    useEffect(() => {
+        if (!photoFile) {
+            setPhotoPreviewUrl("/user.png");
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(photoFile);
+        setPhotoPreviewUrl(objectUrl);
+
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+    }, [photoFile]);
+
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const selected = event.target.files?.[0] ?? null;
+
+        if (!selected) {
+            setPdfFile(null);
+            setPdfError("");
+            setSkillsError("");
+            setSelectedSkills([]);
+            return;
+        }
+
+        const isPdfByType = selected.type === "application/pdf";
+        const isPdfByExt = selected.name.toLowerCase().endsWith(".pdf");
+
+        if (!isPdfByType && !isPdfByExt) {
+            setPdfFile(null);
+            setPdfError("Solo se permiten archivos PDF.");
+            setSkillsError("");
+            setSelectedSkills([]);
+            return;
+        }
+
+        setPdfError("");
+        setSkillsError("");
+        setPdfFile(selected);
+
+        try {
+            setIsExtractingSkills(true);
+            const formData = new FormData();
+            formData.append("file", selected);
+
+            const response = await fetch("/api/extractTextPDF", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = (await response.json()) as { text?: string; error?: string };
+
+            if (!response.ok) {
+                throw new Error(data.error ?? "No se pudo analizar el PDF.");
+            }
+
+            const extracted = detectSkillsFromText(data.text ?? "");
+            setSelectedSkills(extracted);
+        } catch (error) {
+            setSkillsError(error instanceof Error ? error.message : "No se pudieron extraer habilidades del PDF.");
+        } finally {
+            setIsExtractingSkills(false);
+        }
+    };
+
+    const toggleSkill = (skill: string) => {
+        setSelectedSkills((prev) =>
+            prev.includes(skill)
+                ? prev.filter((item) => item !== skill)
+                : [...prev, skill]
+        );
+    };
+
+    const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const selected = event.target.files?.[0] ?? null;
+
+        if (!selected) {
+            setPhotoFile(null);
+            return;
+        }
+
+        const isImageByType = selected.type.startsWith("image/");
+        const isImageByExt = /\.(png|jpe?g|webp|gif|avif)$/i.test(selected.name);
+
+        if (!isImageByType && !isImageByExt) {
+            setPhotoFile(null);
+            return;
+        }
+
+        setPhotoFile(selected);
+    };
+
+    return (
+        <section className="w-full max-w-300 flex items-center justify-center py-8 px-8 mx-auto min-h-screen">
+            <form className="flex w-full flex-col md:flex-row items-center justify-center gap-4">
+                <div className="w-full md:w-1/2 flex justify-center mb-4 md:mb-0">
+                    <div className="w-full max-w-xl h-[60vh] md:h-[80vh] max-h-150 rounded-2xl bg-neutral-200 dark:bg-neutral-800 p-4">
+                        {!previewUrl ? (
+                            <>
+                                <label
+                                    htmlFor="file"
+                                    className=" flex flex-col items-center justify-center h-full group cursor-pointer rounded-xl border-2 border-dashed border-neutral-500 hover:border-[#2da984]/60 dark:hover:border-[#60be7f] p-4 text-center transition-colors duration-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                                >
+                                    <input
+                                        id="file"
+                                        type="file"
+                                        name="file"
+                                        accept="application/pdf,.pdf"
+                                        onChange={handleFileChange}
+                                        className="sr-only"
+                                    />
+                                    <span className="mb-3 rounded-lg bg-white px-3 py-1 text-xs font-semibold text-neutral-700 ring-1 ring-neutral-200 transition-colors duration-300 group-hover:text-neutral-900">Seleccionar CV</span>
+                                    <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Selecciona el CV del empleado para cargar su información.</p>
+                                    {pdfFile && <p className="mt-4 truncate text-xs font-medium text-neutral-700 dark:text-neutral-400">{pdfFile.name}</p>}
+                                </label>
+
+                                {pdfError && <p className="mt-2 text-xs font-semibold text-red-600">{pdfError}</p>}
+                            </>
+                        ) : (
+                            <div className="h-full overflow-hidden rounded-xl border bg-neutral-100 dark:bg-neutral-700">
+                                <div className="flex items-center justify-between border-b bg-neutral-50 dark:bg-neutral-700 px-3 py-2">
+                                    <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 ">Previsualizacion</p>
+                                    <label
+                                        htmlFor="file"
+                                        className="cursor-pointer rounded-md px-3 py-2 text-xs font-semibold text-neutral-800 bg-neutral-200 hover:bg-neutral-300 transition-colors duration-300"
+                                    >
+                                        Cambiar PDF
+                                    </label>
+                                    <input
+                                        id="file"
+                                        type="file"
+                                        name="file"
+                                        accept="application/pdf,.pdf"
+                                        onChange={handleFileChange}
+                                        className="sr-only"
+                                    />
+                                </div>
+                                <iframe
+                                    title="Previsualizacion del PDF"
+                                    src={previewUrl}
+                                    className="h-full w-full"
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="w-full flex flex-col md:w-1/2 md:ml-4 gap-y-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/50 p-5">
+                    <div className="datos flex items-center space-x-4">
+                        <label htmlFor="photo" className="cursor-pointer shrink-0">
+                            <img className="rounded-full size-20 min-w-20 object-cover ring-2 ring-transparent transition duration-300 hover:ring-[#30aa85]/40  border border-neutral-200 dark:border-neutral-700" src={photoPreviewUrl} alt="Employee Profile Image"/>
+                        </label>
+                        <input
+                            id="photo"
+                            type="file"
+                            name="photo"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            className="sr-only"
+                        />
+                        <div className="w-full">
+                            <input
+                                type="text"
+                                id="nombre"
+                                name="nombre"
+                                className=' placeholder:text-neutral-600 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 text-2xl font-semibold focus:outline-none w-full rounded-md mb-2'
+                                placeholder="Nombre"
+                            />
+                            <select defaultValue="select" name="puesto" id="puesto" className="text-sm md:text-md text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 p-2 focus:outline-none w-full rounded-md">
+                                <option className="text-neutral-900" value="select" disabled>Selecciona un puesto</option>
+                                <option className="text-neutral-900" value="frontend">Front End Developer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 md:gap-4 w-full">
+                        <input
+                            type="email"
+                            id='email'
+                            name="email"
+                            className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-700 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 focus:outline-none w-full md:w-[60%] rounded-md'
+                            placeholder="Correo electronico"
+                        />
+                        <input
+                            type="text"
+                            id='telefono'
+                            name="telefono"
+                            className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-700 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 focus:outline-none w-full md:w-[40%] rounded-md'
+                            placeholder="Teléfono"
+                        />
+                    </div>
+                    
+                    <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
+                        <div className="mb-3 flex items-center justify-between">
+                            <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-100">Habilidades</p>
+                            <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{selectedSkills.length} / {skillOptions.length}</span>
+                        </div>
+
+                        {isExtractingSkills && (
+                            <p className="mb-3 text-xs font-medium text-neutral-500 dark:text-neutral-400">Analizando CV para detectar habilidades...</p>
+                        )}
+
+                        {skillsError && (
+                            <p className="mb-3 text-xs font-semibold text-red-700 dark:text-red-400">{skillsError}</p>
+                        )}
+
+                        <div className="flex flex-wrap gap-2">
+                            {skillOptions.map((skill) => {
+                                const isSelected = selectedSkills.includes(skill);
+
+                                return (
+                                    <button
+                                        key={skill}
+                                        type="button"
+                                        onClick={() => toggleSkill(skill)}
+                                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-300 ${
+                                            isSelected
+                                                ? "border-[#30aa85] bg-[#30aa85] text-white"
+                                                : "border-neutral-300 bg-neutral-100 text-neutral-700 hover:border-[#30aa85]/60 hover:text-[#30aa85] dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
+                                        }`}
+                                    >
+                                        {skill}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <input type="hidden" name="skills" value={selectedSkills.join(",")} />
+                    </div>
+                        
+                    <button type="submit" className="bg-default-300 cursor-pointer font-semibold text-white h-10 w-38 rounded-lg transition-colors duration-300">GUARDAR</button>
+                </div>
+            </form>
+        </section>
+    );
+}
+ 
+export default nuevoEmpleadoPage;
