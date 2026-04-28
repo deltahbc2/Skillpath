@@ -2,7 +2,7 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="relative overflow-hidden bg-[#1e293b] text-white mt-[-1px]">
+        <footer className="relative overflow-hidden bg-[#1e293b] text-white -mt-px">
             <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[60%] rounded-full bg-blue-500/20 blur-[100px]"></div>
 
             <div className="pointer-events-none absolute inset-0">
