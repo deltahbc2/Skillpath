@@ -2,6 +2,7 @@
 
 import { Briefcase, LayoutDashboard, LogOut, Route, User } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 type SideBarProps = {
@@ -9,6 +10,15 @@ type SideBarProps = {
 };
 
 const SideBar = ({ isCollapsed }: SideBarProps) => {
+    const pathname = usePathname();
+    
+    const isActive = (href: string) => {
+        if (href === "/admin") {
+            return pathname === "/admin";
+        }
+        return pathname.startsWith(href);
+    };
+
     const asideWidthClass = useMemo(() => {
         return isCollapsed ? "w-0 md:w-22" : "w-full md:w-72";
     }, [isCollapsed]);
@@ -30,7 +40,11 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                 <Link
                     href="/admin"
                     title={isCollapsed ? "Dashboard": ''}
-                    className={`flex items-center rounded-xl text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900 font-medium transition-colors ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
+                    className={`flex items-center rounded-xl font-medium transition-colors ${
+                        isActive("/admin")
+                            ? "bg-[#5cbb80]/20 text-neutral-900"
+                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                    } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <LayoutDashboard/>
                     {!isCollapsed && <span>Dashboard</span>}
@@ -38,7 +52,11 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                 <Link
                     href="/admin/puestos"
                     title={isCollapsed ? "Puestos" : ''}
-                    className={`flex items-center rounded-xl text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900 font-medium transition-colors ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
+                    className={`flex items-center rounded-xl font-medium transition-colors ${
+                        isActive("/admin/puestos")
+                            ? "bg-[#5cbb80]/20 text-neutral-900"
+                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                    } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <Briefcase/>
                     {!isCollapsed && <span>Puestos</span>}
@@ -46,7 +64,11 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                 <Link
                     href="/admin/colaboradores"
                     title={isCollapsed ? "Colaboradores": ''}
-                    className={`flex items-center rounded-xl text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900 font-medium transition-colors ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
+                    className={`flex items-center rounded-xl font-medium transition-colors ${
+                        isActive("/admin/colaboradores")
+                            ? "bg-[#5cbb80]/20 text-neutral-900"
+                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                    } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <User/>
                     {!isCollapsed && <span>Colaboradores</span>}
@@ -54,7 +76,11 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                 <Link
                     href="/admin/roadmaps"
                     title={isCollapsed ? "Roadmaps" : ''}
-                    className={`flex items-center rounded-xl text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900 font-medium transition-colors ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
+                    className={`flex items-center rounded-xl font-medium transition-colors ${
+                        isActive("/admin/roadmaps")
+                            ? "bg-[#5cbb80]/20 text-neutral-900"
+                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                    } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <Route/>
                     {!isCollapsed && <span>Roadmaps</span>}
