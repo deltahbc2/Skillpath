@@ -20,7 +20,7 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
     };
 
     const asideWidthClass = useMemo(() => {
-        return isCollapsed ? "w-0 md:w-22" : "w-full md:w-72";
+        return isCollapsed ? "w-0 md:w-22" : "fixed inset-y-0 left-0 z-30 w-full md:static md:w-72";
     }, [isCollapsed]);
 
     return (
