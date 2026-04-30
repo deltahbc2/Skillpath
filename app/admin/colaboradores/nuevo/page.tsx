@@ -233,7 +233,7 @@ const nuevoEmpleadoPage = () => {
                                 className=' placeholder:text-neutral-600 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 text-2xl font-semibold focus:outline-none w-full rounded-md mb-2'
                                 placeholder="Nombre"
                             />
-                            <select defaultValue="select" name="puesto" id="puesto" className="text-sm md:text-md text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 p-2 focus:outline-none w-full rounded-md">
+                            <select defaultValue="select" name="puesto" id="puesto" className="text-md text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 p-2 focus:outline-none w-full rounded-md">
                                 <option className="text-neutral-900" value="select" disabled>Selecciona un puesto</option>
                                 <option className="text-neutral-900" value="frontend">Front End Developer</option>
                             </select>
@@ -244,14 +244,14 @@ const nuevoEmpleadoPage = () => {
                             type="email"
                             id='email'
                             name="email"
-                            className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-700 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 focus:outline-none w-full md:w-[60%] rounded-md'
+                            className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 py-2 px-3 focus:outline-none w-full md:w-[60%] rounded-md'
                             placeholder="Correo electronico"
                         />
                         <input
                             type="text"
                             id='telefono'
                             name="telefono"
-                            className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-700 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 focus:outline-none w-full md:w-[40%] rounded-md'
+                            className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 py-2 px-3 focus:outline-none w-full md:w-[40%] rounded-md'
                             placeholder="Teléfono"
                         />
                     </div>
@@ -282,7 +282,7 @@ const nuevoEmpleadoPage = () => {
                                         className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-300 ${
                                             isSelected
                                                 ? "border-[#30aa85] bg-[#30aa85] text-white"
-                                                : "border-neutral-300 bg-neutral-100 text-neutral-700 hover:border-[#30aa85]/60 hover:text-[#30aa85] dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
+                                                : "border-neutral-300 bg-neutral-100 text-neutral-700 hover:border-[#30aa85]/60 hover:text-[#30aa85] dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 cursor-pointer"
                                         }`}
                                     >
                                         {skill}

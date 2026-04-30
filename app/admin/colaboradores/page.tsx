@@ -1,3 +1,4 @@
+import { Eye, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 const empleadosPage = () => {
@@ -47,13 +48,21 @@ const empleadosPage = () => {
                                 </div>
                             </td>
                             <td className="px-6 py-4 text-right min-w-35">
-                                <Link href='/admin/colaboradores/id' className="py-2 px-3 bg-default-300 hover:bg-[#30aa8580] text-white rounded-md cursor-pointer text-sm">Ver datos</Link>
+                                <div className="flex items-center justify-end gap-2">
+                                    <button className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
+                                        <Eye className="size-4 text-neutral-600" />
+                                    </button>
+                                    <button className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
+                                        <Trash2 className="size-4 text-red-500" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 
-                <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50 flex items-center justify-between">
+                <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50 flex items-center justify-between text-sm text-neutral-600">
+                    <span>Total: 10 colaboradores</span>
                 </div>
             </div>
         </section>

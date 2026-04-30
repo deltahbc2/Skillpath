@@ -1,13 +1,115 @@
-const AdminPage = () => {
-    return (
-        <div className="">
-            DASHBOARD DE ADMIN
-            MUESTRA LISTA DE PUESTOS, CON OPCION DE EDITAR
-            MUESTRA LISTA DE USUARIOS, CON OPCION DE EDITAR
+"use client";
 
-            BOTON CREAR PUESTO, QUE LLEVA A FORMULARIO DE CREACION DE PUESTO /puestos
-            BOTON CREAR USUARIO, QUE LLEVA A FORMULARIO DE CREACION DE USUARIO /empleados
-        </div>
+import { useMemo, useState } from "react";
+import KpiCard from "./_components/KpiCard";
+import SearchInput from "./_components/SearchInput";
+import EmptyState from "./_components/EmptyState";
+import { colaboradores as colaboradoresFixture, puestos as puestosFixture } from "../../data/fixtures";
+import Link from "next/link";
+import { Users, Briefcase, Calendar } from "lucide-react";
+
+const AdminPage = () => {
+    const [q, setQ] = useState("");
+
+    const totalColaboradores = colaboradoresFixture.length;
+    const totalPuestos = puestosFixture.length;
+
+    const promedioProgreso = useMemo(() => {
+        if (colaboradoresFixture.length === 0) return 0;
+        const sum = colaboradoresFixture.reduce((s, c) => s + c.progreso, 0);
+        return Math.round(sum / colaboradoresFixture.length);
+    }, []);
+
+    const nuevasIncorporaciones = useMemo(() => {
+        const now = new Date();
+        const days30 = new Date(now);
+        days30.setDate(now.getDate() - 30);
+        return colaboradoresFixture.filter(c => new Date(c.ingreso) >= days30).length;
+    }, []);
+
+    const colaboradoresFiltrados = colaboradoresFixture.filter(c =>
+        c.nombre.toLowerCase().includes(q.toLowerCase()) || c.puesto.toLowerCase().includes(q.toLowerCase())
+    );
+
+    return (
+        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto min-h-screen">
+            <div className="flex flex-col md:flex-row w-full items-start md:items-center justify-between mb-4">
+                <div className="flex flex-col mb-4 md:mb-0">
+                    <h2 className="text-lg font-medium text-neutral-900">Panel de Administración</h2>
+                    <h3 className="text-md font-medium text-neutral-500">Resumen general de colaboradores, puestos y roadmaps.</h3>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Link href="/admin/colaboradores/nuevo" className="py-2 px-3 bg-default-300 hover:bg-[#30aa8580] text-white rounded-md">Añadir Colaborador</Link>
+                    <Link href="/admin/puestos/nuevo" className="py-2 px-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-md">Añadir Puesto</Link>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <KpiCard title="Total Colaboradores" value={totalColaboradores} icon={<Users className="size-5"/>} />
+                <KpiCard title="Total Puestos" value={totalPuestos} icon={<Briefcase className="size-5"/>} />
+                <KpiCard title="Promedio Progreso" value={`${promedioProgreso}%`} icon={<Calendar className="size-5"/>} />
+                <KpiCard title="Nuevas incorporaciones (30d)" value={nuevasIncorporaciones} />
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1 rounded-2xl border border-neutral-100 bg-white p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-sm font-semibold text-neutral-700">Colaboradores</h4>
+                        <div className="w-64"><SearchInput value={q} onChange={setQ} placeholder="Buscar por nombre o puesto..." /></div>
+                    </div>
+
+                    {colaboradoresFiltrados.length === 0 ? (
+                        <EmptyState title="No hay colaboradores" description="No se encontraron colaboradores con esos criterios." cta={<Link href="/admin/colaboradores/nuevo" className="text-default-300">Crear colaborador</Link>} />
+                    ) : (
+                        <ul className="flex flex-col gap-3">
+                            {colaboradoresFiltrados.map(c => (
+                                <li key={c.id} className="flex items-center justify-between p-3 rounded-lg border border-neutral-100 hover:bg-neutral-50 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <img src={c.avatar ?? ''} alt={c.nombre} className="size-10 rounded-xl object-cover border border-neutral-200" />
+                                        <div className="flex flex-col">
+                                            <div className="font-semibold text-neutral-900">{c.nombre}</div>
+                                            <div className="text-xs text-neutral-500">{c.puesto} — {c.email}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm font-bold">{c.progreso}%</div>
+                                        <Link href={`/admin/colaboradores/${c.id}`} className="text-sm text-default-300">Ver</Link>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                <div className="w-96 rounded-2xl border border-neutral-100 bg-white p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-sm font-semibold text-neutral-700">Puestos</h4>
+                        <Link href="/admin/puestos" className="text-sm text-neutral-500">Ver todos</Link>
+                    </div>
+
+                    <ul className="flex flex-col gap-3">
+                        {puestosFixture.map(p => (
+                            <li key={p.id} className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                    <div className="font-semibold text-neutral-900">{p.nombre}</div>
+                                    <div className="text-xs text-neutral-500">{p.descripcion}</div>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {p.habilidades.slice(0,3).map(h => (
+                                            <span key={h} className="px-2 py-1 bg-neutral-100 text-neutral-700 text-xs rounded-full">{h}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm font-medium">{p.colaboradores}</div>
+                                    <div className="text-xs text-neutral-500">{p.creado}</div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </section>
     );
 }
  

@@ -38,8 +38,8 @@ const empleadoIdPage = () => {
                         </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 md:gap-4 w-full">
-                        <a href="mailto:cesaroliva.work@gmail.com" className="py-1 px-2 rounded-md border border-neutral-300 text-md w-full sm:w-[60%] text-neutral-800 overflow-hidden">cesaroliva.work@gmail.com</a>
-                        <a href="tel:8130416824" className="py-1 px-2 rounded-md border border-neutral-300 text-md w-full sm:w-[40%] text-neutral-800">8130416824</a>
+                        <a href="mailto:cesaroliva.work@gmail.com" className=" py-2 px-3 rounded-md border border-neutral-300 text-md w-full sm:w-[60%] text-neutral-800 overflow-hidden">cesaroliva.work@gmail.com</a>
+                        <a href="tel:8130416824" className=" py-2 px-3 rounded-md border border-neutral-300 text-md w-full sm:w-[40%] text-neutral-800">8130416824</a>
                     </div>
 
                     <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
