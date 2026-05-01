@@ -41,7 +41,7 @@ const AdminPage = () => {
 
                 <div className="flex items-center gap-3">
                     <Link href="/admin/colaboradores/nuevo" className="py-2 px-3 bg-default-300 hover:bg-[#30aa8580] text-white rounded-md">Añadir Colaborador</Link>
-                    <Link href="/admin/puestos/nuevo" className="py-2 px-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-md">Añadir Puesto</Link>
+                    <Link href="/admin/puestos/nuevo" className="py-2 px-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-900 rounded-md">Añadir Puesto</Link>
                 </div>
             </div>
 
