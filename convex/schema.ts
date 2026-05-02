@@ -6,16 +6,16 @@ export default defineSchema({
         userId: v.string(),
         name: v.string(),
         email: v.string(),
-        phone: v.number(),
+        phone: v.optional(v.number()),
         photo: v.optional(v.string()),
-        role: v.id("roles"),
-        cv: v.string(),
+        role: v.optional(v.id("roles")),
+        cv: v.optional(v.string()),
         admin: v.boolean(),
     }),
 
     skills: defineTable({
         name: v.string(),
-        description: v.string(),
+        description: v.optional(v.string()),
     }),
     
     roles: defineTable({
