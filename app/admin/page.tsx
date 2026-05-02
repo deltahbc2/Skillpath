@@ -6,7 +6,7 @@ import SearchInput from "./_components/SearchInput";
 import EmptyState from "./_components/EmptyState";
 import { colaboradores as colaboradoresFixture, puestos as puestosFixture } from "../../data/fixtures";
 import Link from "next/link";
-import { Users, Briefcase, Calendar } from "lucide-react";
+import { Users, Briefcase, Calendar, UserPlus } from "lucide-react";
 
 const AdminPage = () => {
     const [q, setQ] = useState("");
@@ -32,10 +32,10 @@ const AdminPage = () => {
     );
 
     return (
-        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto min-h-screen">
+        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <div className="flex flex-col md:flex-row w-full items-start md:items-center justify-between mb-4">
                 <div className="flex flex-col mb-4 md:mb-0">
-                    <h2 className="text-lg font-medium text-neutral-900">Panel de Administración</h2>
+                    <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-200">Panel de Administración</h2>
                     <h3 className="text-md font-medium text-neutral-500">Resumen general de colaboradores, puestos y roadmaps.</h3>
                 </div>
 
@@ -49,13 +49,13 @@ const AdminPage = () => {
                 <KpiCard title="Total Colaboradores" value={totalColaboradores} icon={<Users className="size-5"/>} />
                 <KpiCard title="Total Puestos" value={totalPuestos} icon={<Briefcase className="size-5"/>} />
                 <KpiCard title="Promedio Progreso" value={`${promedioProgreso}%`} icon={<Calendar className="size-5"/>} />
-                <KpiCard title="Nuevas incorporaciones (30d)" value={nuevasIncorporaciones} />
+                <KpiCard title="Nuevas incorporaciones (30d)" value={nuevasIncorporaciones} icon={<UserPlus className="size-5"/>} />
             </div>
 
             <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-1 rounded-2xl border border-neutral-100 bg-white p-4">
+                <div className="flex-1 rounded-2xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50 dark:bg-neutral-800 p-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-semibold text-neutral-700">Colaboradores</h4>
+                        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Colaboradores</h4>
                         <div className="w-64"><SearchInput value={q} onChange={setQ} placeholder="Buscar por nombre o puesto..." /></div>
                     </div>
 
@@ -64,16 +64,16 @@ const AdminPage = () => {
                     ) : (
                         <ul className="flex flex-col gap-3">
                             {colaboradoresFiltrados.map(c => (
-                                <li key={c.id} className="flex items-center justify-between p-3 rounded-lg border border-neutral-100 hover:bg-neutral-50 transition-colors">
+                                <li key={c.id} className="flex items-center justify-between p-3 rounded-lg border border-neutral-200 dark:border-neutral-900/50 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors">
                                     <div className="flex items-center gap-3">
                                         <img src={c.avatar ?? ''} alt={c.nombre} className="size-10 rounded-xl object-cover border border-neutral-200" />
                                         <div className="flex flex-col">
-                                            <div className="font-semibold text-neutral-900">{c.nombre}</div>
-                                            <div className="text-xs text-neutral-500">{c.puesto} — {c.email}</div>
+                                            <div className="font-semibold text-neutral-900 dark:text-neutral-200">{c.nombre}</div>
+                                            <div className="text-xs text-neutral-500 dark:text-neutral-400">{c.puesto} — {c.email}</div>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-sm font-bold">{c.progreso}%</div>
+                                        <div className="text-neutral-800 dark:text-neutral-200 text-sm font-bold">{c.progreso}%</div>
                                         <Link href={`/admin/colaboradores/${c.id}`} className="text-sm text-default-300">Ver</Link>
                                     </div>
                                 </li>
@@ -82,21 +82,21 @@ const AdminPage = () => {
                     )}
                 </div>
 
-                <div className="w-96 rounded-2xl border border-neutral-100 bg-white p-4">
+                <div className="md:w-96 rounded-2xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50 dark:bg-neutral-800 p-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-semibold text-neutral-700">Puestos</h4>
-                        <Link href="/admin/puestos" className="text-sm text-neutral-500">Ver todos</Link>
+                        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Puestos</h4>
+                        <Link href="/admin/puestos" className="text-sm text-neutral-500 dark:text-neutral-400">Ver todos</Link>
                     </div>
 
                     <ul className="flex flex-col gap-3">
                         {puestosFixture.map(p => (
                             <li key={p.id} className="flex items-start justify-between gap-3">
                                 <div className="flex-1">
-                                    <div className="font-semibold text-neutral-900">{p.nombre}</div>
-                                    <div className="text-xs text-neutral-500">{p.descripcion}</div>
+                                    <div className="font-semibold text-neutral-900 dark:text-neutral-200">{p.nombre}</div>
+                                    <div className="text-xs text-neutral-500 dark:text-neutral-400">{p.descripcion}</div>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {p.habilidades.slice(0,3).map(h => (
-                                            <span key={h} className="px-2 py-1 bg-neutral-100 text-neutral-700 text-xs rounded-full">{h}</span>
+                                            <span key={h} className="px-2 py-1 bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 text-neutral-700 text-xs rounded-full">{h}</span>
                                         ))}
                                     </div>
                                 </div>

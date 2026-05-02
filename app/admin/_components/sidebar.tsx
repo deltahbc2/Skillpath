@@ -3,7 +3,7 @@
 import { Briefcase, LayoutDashboard, LogOut, Route, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 type SideBarProps = {
     isCollapsed: boolean;
@@ -24,13 +24,13 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
     }, [isCollapsed]);
 
     return (
-        <aside className={`${asideWidthClass} bg-neutral-50 border-r border-neutral-300 flex flex-col h-screen shrink-0 transition-all duration-300 overflow-hidden`}>
-            <div className="h-20 flex items-center px-4 border-b border-neutral-300 justify-between gap-2">
+        <aside className={`${asideWidthClass} bg-neutral-50 dark:bg-neutral-900 border-r border-neutral-300 dark:border-neutral-700 flex flex-col h-screen shrink-0 transition-all duration-300 overflow-hidden`}>
+            <div className="h-20 flex items-center px-4 border-b border-neutral-300 dark:border-neutral-700 justify-between gap-2">
                 <div className="flex items-center gap-3 min-w-0">
                     <div className="rounded-lg bg-default-100 flex items-center justify-center p-1 shrink-0">
                         <Route className="size-7 text-white"/>
                     </div>
-                    {!isCollapsed && <span className="text-2xl font-bold text-neutral-900 tracking-tight truncate">SkillPath</span>}
+                    {!isCollapsed && <span className="text-2xl font-bold text-neutral-900 dark:text-neutral-300 tracking-tight truncate">SkillPath</span>}
                 </div>
             </div>
 
@@ -42,8 +42,8 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                     title={isCollapsed ? "Dashboard": ''}
                     className={`flex items-center rounded-xl font-medium transition-colors ${
                         isActive("/admin")
-                            ? "bg-[#5cbb80]/20 text-neutral-900"
-                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                            ? "bg-[#5cbb80]/20 text-neutral-900 dark:text-neutral-300"
+                            : "text-neutral-600 dark:text-neutral-400 hover:bg-[#5cbb80]/20 hover:text-neutral-900 dark:hover:text-neutral-300"
                     } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <LayoutDashboard/>
@@ -54,8 +54,8 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                     title={isCollapsed ? "Puestos" : ''}
                     className={`flex items-center rounded-xl font-medium transition-colors ${
                         isActive("/admin/puestos")
-                            ? "bg-[#5cbb80]/20 text-neutral-900"
-                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                            ? "bg-[#5cbb80]/20 text-neutral-900 dark:text-neutral-300"
+                            : "text-neutral-600 dark:text-neutral-400 hover:bg-[#5cbb80]/20 hover:text-neutral-900 dark:hover:text-neutral-300"
                     } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <Briefcase/>
@@ -66,8 +66,8 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                     title={isCollapsed ? "Colaboradores": ''}
                     className={`flex items-center rounded-xl font-medium transition-colors ${
                         isActive("/admin/colaboradores")
-                            ? "bg-[#5cbb80]/20 text-neutral-900"
-                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                            ? "bg-[#5cbb80]/20 text-neutral-900 dark:text-neutral-300"
+                            : "text-neutral-600 dark:text-neutral-400 hover:bg-[#5cbb80]/20 hover:text-neutral-900 dark:hover:text-neutral-300"
                     } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <User/>
@@ -78,8 +78,8 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                     title={isCollapsed ? "Roadmaps" : ''}
                     className={`flex items-center rounded-xl font-medium transition-colors ${
                         isActive("/admin/roadmaps")
-                            ? "bg-[#5cbb80]/20 text-neutral-900"
-                            : "text-neutral-600 hover:bg-[#5cbb80]/20 hover:text-neutral-900"
+                            ? "bg-[#5cbb80]/20 text-neutral-900 dark:text-neutral-300"
+                            : "text-neutral-600 dark:text-neutral-400 hover:bg-[#5cbb80]/20 hover:text-neutral-900 dark:hover:text-neutral-300"
                     } ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-3"}`}
                 >
                     <Route/>
@@ -87,7 +87,7 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                 </Link>
             </div>
 
-            <div className={`p-4 border-t border-neutral-100 flex flex-col gap-2 ${isCollapsed ? "items-center" : ""}`}>
+            <div className={`p-4 border-t border-neutral-100 dark:border-neutral-700 flex flex-col gap-2 ${isCollapsed ? "items-center" : ""}`}>
                 <a
                     href="#"
                     title="Cerrar Sesión"

@@ -15,7 +15,7 @@ const skillOptions = [
 
 const puestoNombrePage = () => {
     return (
-        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto min-h-screen">
+        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <h2 className="text-lg font-medium text-neutral-900">Datos del puesto</h2>
             <h3 className="text-md font-medium text-neutral-500">Edita y valida la información del puesto y sus habilidades requeridas.</h3>
 

@@ -30,7 +30,7 @@ const puestosData = [
 
 const puestosPage = () => {
     return (
-        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto min-h-screen">
+        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <div className="flex flex-col md:flex-row w-full items-start md:items-center justify-between mb-4">
                 <div className="flex flex-col mb-4 md:mb-0">
                     <h2 className="text-lg font-medium text-neutral-900">Directorio de Puestos</h2>

@@ -1,6 +1,6 @@
 const AdminRoadmapsPage = () => {
   return (
-    <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto min-h-screen">
+    <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-medium text-neutral-900">Roadmaps (Administración)</h2>

@@ -13,7 +13,7 @@ const skillOptions = [
 
 const empleadoIdPage = () => {
     return (
-        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto min-h-screen">
+        <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <h2 className="text-lg font-medium text-neutral-900">Perfil del colaborador</h2>
             <h3 className="text-md font-medium text-neutral-500">Consulta los datos del colaborador, su puesto y su progreso en la capacitación.</h3>
             <form className="flex w-full flex-col md:flex-row items-center justify-center gap-4 mt-4">
