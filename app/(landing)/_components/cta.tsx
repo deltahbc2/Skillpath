@@ -31,7 +31,7 @@ const CallToAction = () => {
                     )}
 
                     {!isAuthenticated && !isLoading && (
-                        <SignInButton>
+                        <SignInButton mode="modal">
                             <button
                                 type="button"
                                 className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-default-500 px-8 py-4 text-lg font-semibold text-white transition-all shadow-glow hover:bg-primary-hover"

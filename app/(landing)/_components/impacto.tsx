@@ -45,7 +45,7 @@ const Impacto = () => {
                     
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-4">
                         <div className="flex justify-between items-center mb-4">
-                            <span className="font-semibold text-heading">Porcentaje de Avance</span>
+                            <span className="text-neutral-800 font-semibold text-heading">Porcentaje de Avance</span>
                             <span className="text-default-700 font-bold">85%</span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-2">
@@ -55,11 +55,11 @@ const Impacto = () => {
                     
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
-                            <div className="text-3xl font-bold text-heading mb-1">-40%</div>
+                            <div className="text-neutral-800 text-3xl font-bold text-heading mb-1">-40%</div>
                             <div className="text-xs text-slate-500 uppercase tracking-wide">Tiempo Onboarding</div>
                         </div>
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
-                            <div className="text-3xl font-bold text-heading mb-1">+2.5x</div>
+                            <div className="text-neutral-800 text-3xl font-bold text-heading mb-1">+2.5x</div>
                             <div className="text-xs text-slate-500 uppercase tracking-wide">Retención Conocimiento</div>
                         </div>
                     </div>

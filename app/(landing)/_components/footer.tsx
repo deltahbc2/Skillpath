@@ -38,7 +38,7 @@ const Footer = () => {
                                 href="https://deltahbc.com"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="block rounded-xl border border-default-100/40 bg-default-500/20 px-4 py-3 font-medium text-default-100 transition-colors hover:bg-default-500/35"
+                                className="block rounded-xl border border-default-100/40 bg-default-500/20 px-4 py-3 font-medium text-default-100 transition-colors hover:bg-[#009388]/35"
                             >
                                 deltahbc.com
                             </a>
