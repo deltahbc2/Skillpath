@@ -8,6 +8,54 @@ import { api } from "@/convex/_generated/api";
 import EmptyState from "../_components/EmptyState";
 import Spinner from "@/components/Spinner";
 
+const RoleRow = ({ role }: { role: any }) => {
+    const skills = useQuery(api.skills.getSkillsByRoleId, { roleId: role._id });
+
+    return (
+        <tr key={role._id} className="hover:bg-neutral-50/50 transition-colors group">
+            <td className="px-6 py-4">
+                <div className="flex flex-col">
+                    <div className="font-semibold text-neutral-900 text-md">{role.name}</div>
+                    <div className="text-sm text-neutral-500 mt-1">{role.description}</div>
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <div className="flex flex-wrap gap-2">
+                    {skills === undefined ? (
+                        <Spinner className="size-5" label="Cargando habilidades" />
+                    ) : skills.length === 0 ? (
+                        <span className="text-xs text-neutral-400">Sin habilidades</span>
+                    ) : (
+                        <>
+                            {skills.slice(0, 2).map((skill: any) => (
+                                <span key={skill._id} className="px-2 py-1 border border-neutral-300 bg-neutral-100 text-neutral-800 text-xs font-medium rounded-full">
+                                    {skill.name}
+                                </span>
+                            ))}
+                            {skills.length > 2 && (
+                                <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full">
+                                    +{skills.length - 2}
+                                </span>
+                            )}
+                        </>
+                    )}
+                </div>
+            </td>
+            <td className="px-6 py-4"></td>
+            <td className="px-6 py-4 text-right">
+                <div className="flex items-center justify-end gap-2">
+                    <button className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
+                        <Eye className="size-4 text-neutral-600" />
+                    </button>
+                    <button className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
+                        <Trash2 className="size-4 text-red-500" />
+                    </button>
+                </div>
+            </td>
+        </tr>
+    );
+};
+
 const puestosPage = () => {
     const roles = useQuery(api.roles.getRoles);
 
@@ -41,41 +89,7 @@ const puestosPage = () => {
                     </thead>
                     <tbody className="divide-y divide-neutral-50">
                         {roles.map((role) => (
-                            <tr key={role._id} className="hover:bg-neutral-50/50 transition-colors group">
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-col">
-                                        <div className="font-semibold text-neutral-900 text-md">{role.name}</div>
-                                        <div className="text-sm text-neutral-500 mt-1">{role.description}</div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-wrap gap-2">
-                                        {/* {role.habilidades.slice(0, 2).map((skill) => (
-                                            <span key={skill} className="px-2 py-1 border border-neutral-300 bg-neutral-100 text-neutral-800 text-xs font-medium rounded-full">
-                                                {skill}
-                                            </span>
-                                        ))}
-                                        {role.habilidades.length > 2 && (
-                                            <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full">
-                                                +{role.habilidades.length - 2}
-                                            </span>
-                                        )} */}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    {/* <div className="text-sm font-medium text-neutral-800">{role.colaboradores}</div> */}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <button className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
-                                            <Eye className="size-4 text-neutral-600" />
-                                        </button>
-                                        <button className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
-                                            <Trash2 className="size-4 text-red-500" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            <RoleRow key={role._id} role={role} />
                         ))}
                     </tbody>
                 </table>

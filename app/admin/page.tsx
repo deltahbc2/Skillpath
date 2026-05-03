@@ -1,18 +1,39 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
+
 import KpiCard from "./_components/KpiCard";
 import SearchInput from "./_components/SearchInput";
 import EmptyState from "./_components/EmptyState";
-import { colaboradores as colaboradoresFixture, puestos as puestosFixture } from "../../data/fixtures";
-import Link from "next/link";
+import Spinner from "@/components/Spinner";
+import { colaboradores as colaboradoresFixture } from "../../data/fixtures";
 import { Users, Briefcase, Calendar, UserPlus } from "lucide-react";
+import Skeleton from "@/components/Skeleton";
+
+const RoleRow = ({ role }: { role: any }) => {
+    const skills = useQuery(api.skills.getSkillsByRoleId, { roleId: role._id });
+
+    return (
+        <>
+            {skills === undefined ? (
+                <Spinner/>
+            ) : (
+                <span className="px-2 py-1 bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 text-neutral-700 text-xs rounded-full">{skills.length}</span>
+            )}
+        </>
+    )
+};
 
 const AdminPage = () => {
+    const roles = useQuery(api.roles.getRoles);
+    
     const [q, setQ] = useState("");
 
     const totalColaboradores = colaboradoresFixture.length;
-    const totalPuestos = puestosFixture.length;
 
     const promedioProgreso = useMemo(() => {
         if (colaboradoresFixture.length === 0) return 0;
@@ -47,7 +68,15 @@ const AdminPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <KpiCard title="Total Colaboradores" value={totalColaboradores} icon={<Users className="size-5"/>} />
-                <KpiCard title="Total Puestos" value={totalPuestos} icon={<Briefcase className="size-5"/>} />
+
+                {roles === undefined ? (
+                    <div className="w-full flex items-center justify-center">
+                        <Spinner label="Cargando puestos..." className="size-8"/>
+                    </div>
+                ) : (
+                    <KpiCard title="Total Puestos" value={roles.length} icon={<Briefcase className="size-5"/>} />
+                )}
+
                 <KpiCard title="Promedio Progreso" value={`${promedioProgreso}%`} icon={<Calendar className="size-5"/>} />
                 <KpiCard title="Nuevas incorporaciones (30d)" value={nuevasIncorporaciones} icon={<UserPlus className="size-5"/>} />
             </div>
@@ -89,23 +118,26 @@ const AdminPage = () => {
                     </div>
 
                     <ul className="flex flex-col gap-3">
-                        {puestosFixture.map(p => (
-                            <li key={p.id} className="flex items-start justify-between gap-3">
-                                <div className="flex-1">
-                                    <div className="font-semibold text-neutral-900 dark:text-neutral-200">{p.nombre}</div>
-                                    <div className="text-xs text-neutral-500 dark:text-neutral-400">{p.descripcion}</div>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {p.habilidades.slice(0,3).map(h => (
-                                            <span key={h} className="px-2 py-1 bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 text-neutral-700 text-xs rounded-full">{h}</span>
-                                        ))}
+                        {roles === undefined ? (
+                            <div className="w-full flex items-center justify-center">
+                                <Skeleton/>
+                            </div>
+                        ) : (
+                            <>
+                                {roles.map(role => (
+                                    <li key={role._id} className="flex items-start justify-between gap-3">
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-neutral-900 dark:text-neutral-200">{role.name}</div>
+                                            <div className="text-xs text-neutral-500 dark:text-neutral-400">{role.description}</div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-medium">{p.colaboradores}</div>
-                                    <div className="text-xs text-neutral-500">{p.creado}</div>
-                                </div>
-                            </li>
-                        ))}
+                                    <div className="text-right">
+                                        <RoleRow role={role} />
+                                        {/* <div className="text-sm font-medium">{role.colaboradores}</div> */}
+                                    </div>
+                                </li>
+                                ))}
+                            </>
+                        )}
                     </ul>
                 </div>
             </div>

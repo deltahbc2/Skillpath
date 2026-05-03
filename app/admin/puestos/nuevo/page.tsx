@@ -56,6 +56,10 @@ const NuevoPuestoPage = () => {
         return true;
     };
 
+    const onRemoveSkill = (skillToRemove: string) => {
+        setSkills((prev) => prev.filter((skill) => skill !== skillToRemove));
+    };
+
     const onHandleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -149,6 +153,7 @@ const NuevoPuestoPage = () => {
                                 return (
                                     <button
                                         key={index}
+                                        onClick={(e) => onRemoveSkill(skill)}
                                         type="button"
                                         className="rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-300 border-neutral-300 bg-neutral-100 text-neutral-700 hover:border-[#30aa85]/60 hover:text-[#30aa85] dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 cursor-pointer"
                                     >
