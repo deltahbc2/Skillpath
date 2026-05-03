@@ -3,7 +3,7 @@
 import { Briefcase, LayoutDashboard, LogOut, Route, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 type SideBarProps = {
     isCollapsed: boolean;
@@ -87,7 +87,7 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
                 </Link>
             </div>
 
-            <div className={`p-4 border-t border-neutral-100 dark:border-neutral-700 flex flex-col gap-2 ${isCollapsed ? "items-center" : ""}`}>
+            <div className={`p-4 border-t border-neutral-300 dark:border-neutral-700 flex flex-col gap-2 ${isCollapsed ? "items-center" : ""}`}>
                 <a
                     href="#"
                     title="Cerrar Sesión"
