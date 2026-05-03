@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/providers/convex-provider";
+import { Toaster } from "sonner";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -37,6 +38,7 @@ export default function RootLayout({
         <ConvexClientProvider>
           {/* <EdgeStoreProvider> */}
             {children}
+            <Toaster position="bottom-center"/>
           {/* </EdgeStoreProvider> */}
         </ConvexClientProvider>
       </body>
