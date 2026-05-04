@@ -3,13 +3,26 @@
 import Link from "next/link";
 import { Trash2, Eye } from "lucide-react";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import EmptyState from "../_components/EmptyState";
 import Spinner from "@/components/Spinner";
+import { toast } from "sonner";
 
 const RoleRow = ({ role }: { role: any }) => {
     const skills = useQuery(api.skills.getSkillsByRoleId, { roleId: role._id });
+
+    const removeRole = useMutation(api.roles.deleteRoleById);
+
+    const handleRemoveRole = () => {
+        const promise = removeRole({ roleId: role._id });
+
+        toast.promise(promise, {
+            loading: "Eliminando puesto...",
+            success: "Puesto eliminado",
+            error: "Error al eliminar el puesto",
+        });
+    }
 
     return (
         <tr key={role._id} className="hover:bg-neutral-50/50 transition-colors group">
@@ -44,10 +57,10 @@ const RoleRow = ({ role }: { role: any }) => {
             <td className="px-6 py-4"></td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
+                    <Link href={`/admin/puestos/${role.name.replaceAll(' ', '-').toLowerCase()}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
                         <Eye className="size-4 text-neutral-600" />
-                    </button>
-                    <button className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
+                    </Link>
+                    <button onClick={handleRemoveRole} className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
                         <Trash2 className="size-4 text-red-500" />
                     </button>
                 </div>

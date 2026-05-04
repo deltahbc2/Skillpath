@@ -37,6 +37,7 @@ export default defineSchema({
     lessons: defineTable({
         skillId: v.id("skills"),
         title: v.string(),
+        level: v.optional(v.number()),
         description: v.optional(v.string()),
         content: v.string(),
         example: v.string(),
@@ -50,11 +51,11 @@ export default defineSchema({
         answer: v.number(),
     }),
 
-    roleLessons: defineTable({
-        roleId: v.id("roles"),
-        lessonId: v.id("lessons"),
-        order: v.number(),
-    }),
+    // roleLessons: defineTable({
+    //     roleId: v.id("roles"),
+    //     lessonId: v.id("lessons"),
+    //     order: v.number(),
+    // }),
 
     userLessons: defineTable({
         userId: v.id("users"),

@@ -12,25 +12,37 @@ export async function POST(req: Request) {
 
             Devuelve un JSON con este formato:
             {
-            "skill": "${skill}",
+            "skill": "string",
             "lessons": [
                 {
                 "title": "string",
-                "content": "string",
-                "example": "string",
+                "order": number,
+                "level": "basic = 1 | intermediate = 2 | advanced = 3",
+                "content": "explicación clara y útil (3-5 líneas)",
+                "example": "ejemplo práctico real con código si aplica",
                 "quiz": [
                     {
                     "question": "string",
                     "options": ["A","B","C"],
-                    "correct": 0
+                    "correct": number
+                    },
+                    {
+                    "question": "string",
+                    "options": ["A","B","C"],
+                    "correct": number
                     }
                 ]
                 }
             ]
             }
 
-            Máximo 5 lecciones. Contenido breve.
-            Responde SOLO con JSON válido. No agregues texto adicional.
+            Reglas:
+            - Responde solo con JSON valido, sin texto adicional.
+            - El nombre de la habildad NO debe cambiar al proporcionado.
+            - Máximo 5 lecciones
+            - Contenido práctico, no genérico
+            - Ejemplos claros
+            - 2 preguntas por lección
         `;
 
         const completion = await groq.chat.completions.create({

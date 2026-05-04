@@ -20,6 +20,7 @@ const NuevoPuestoPage = () => {
 
     const createRole = useMutation(api.roles.createRole);
     const getRoles = useQuery(api.roles.getRoles);
+    const createLesson = useMutation(api.lessons.createLesson);
 
     const addSkill = () => {
         const normalizedSkill = skillInput.trim().toLowerCase();
@@ -79,7 +80,7 @@ const NuevoPuestoPage = () => {
             description: description.trim(),
             skills,
         });
-        
+
         toast.promise(promise, {
             loading: "Creando puesto...",
             success: "Puesto creado exitosamente!",
@@ -88,6 +89,77 @@ const NuevoPuestoPage = () => {
 
         try {
             await promise;
+
+            setIsGeneratingRoadmap(true);
+
+            try {
+                const generatePromises = skills.map((skill) =>
+                    fetch(`/api/generate-roadmap`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ skill, role: name.trim(), description: description.trim() }),
+                    }).then(async (res) => {
+                        if (!res.ok) throw new Error("Error al generar roadmap");
+                        const json = await res.json();
+                        return { skill, json };
+                    })
+                );
+
+                const results = await Promise.allSettled(generatePromises);
+                const fulfilled = results.filter((r) => r.status === "fulfilled");
+                console.log("Resultados de generación de roadmaps:", fulfilled);
+
+                if (fulfilled.length > 0) {
+                    const lessonPromises = fulfilled.flatMap((result) => {
+                        if (result.status !== "fulfilled") return [];
+
+                        try {
+                            const roadmap = JSON.parse(result.value.json.data) as {
+                                lessons?: Array<{
+                                    title: string;
+                                    content: string;
+                                    example: string;
+                                    quiz?: Array<{
+                                        question: string;
+                                        options: string[];
+                                        correct: number;
+                                    }>;
+                                }>;
+                            };
+
+                            if (!roadmap.lessons?.length) return [];
+
+                            return roadmap.lessons.map((lesson, index) =>
+                                createLesson({
+                                    skillName: result.value.skill,
+                                    title: lesson.title,
+                                    order: index + 1,
+                                    level: undefined,
+                                    content: lesson.content,
+                                    example: lesson.example,
+                                    quiz: lesson.quiz ?? [],
+                                })
+                            );
+                        } catch (error) {
+                            console.error("Error parsing roadmap JSON", error);
+                            toast.error(`Roadmap inválido para ${result.value.skill}.`);
+                            return [];
+                        }
+                    });
+
+                    await Promise.allSettled(lessonPromises);
+                    
+                    toast.success(`Roadmaps generados: ${fulfilled.length}/${skills.length}`);
+                } else {
+                    toast.error("No se generaron roadmaps.");
+                }
+            } catch (err) {
+                console.error(err);
+                toast.error("Error generando roadmaps.");
+            } finally {
+                setIsGeneratingRoadmap(false);
+            }
+
             router.push("/admin/puestos");
         } catch {
             return;

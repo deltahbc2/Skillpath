@@ -58,3 +58,12 @@ export const getRoles = query({
         return roles;
     }
 });
+
+export const deleteRoleById = mutation({
+    args: {
+        roleId: v.id("roles"),
+    },
+    handler: async (ctx, args)=> {
+        return await ctx.db.delete(args.roleId);
+    }
+})
