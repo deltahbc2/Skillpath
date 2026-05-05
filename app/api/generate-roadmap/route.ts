@@ -17,7 +17,7 @@ export async function POST(req: Request) {
                 {
                 "title": "string",
                 "order": number,
-                "level": "basic = 1 | intermediate = 2 | advanced = 3",
+                "level": "basic = 1 | intermediate = 2 | advanced = 3 EN NUMEROS, NO EN TEXXTO",
                 "content": "explicación clara y útil (3-5 líneas)",
                 "example": "ejemplo práctico real con código si aplica",
                 "quiz": [
