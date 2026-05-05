@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const createUser = mutation({
     args: {
@@ -31,3 +31,14 @@ export const createUser = mutation({
         });
     },
 });
+
+export const getUsersByRoleId = query({
+    args: {
+        roleId: v.id("roles"),
+    },
+    handler: async (ctx, args) => {
+        return await ctx.db.query("users")
+            .filter(q => q.eq(q.field("role"), args.roleId))
+            .collect();
+    }
+})
