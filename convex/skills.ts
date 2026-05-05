@@ -42,3 +42,16 @@ export const getSkillsByRoleId = query({
         return skillNames;
     }
 });
+
+export const getSkillsByNames = query({
+    args: {
+        skillNames: v.array(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const normalizedNames = new Set(args.skillNames.map((name) => name.toLowerCase()));
+
+        const skills = await ctx.db.query("skills").collect();
+
+        return skills.filter((skill) => normalizedNames.has(skill.name.toLowerCase()));
+    },
+});
