@@ -45,3 +45,18 @@ export const createLesson = mutation({
         return lessonId;
     }
 });
+
+export const getLessonCountsBySkillIds = query({
+    args: { skillIds: v.array(v.id("skills")) },
+    handler: async (ctx, args) => {
+        const counts = await Promise.all(
+            args.skillIds.map(async (skillId) => {
+                const lessons = await ctx.db.query("lessons")
+                    .filter(q => q.eq(q.field("skillId"), skillId))
+                    .collect();
+                return { skillId, count: lessons.length };
+            })
+        );
+        return counts;
+    }
+});

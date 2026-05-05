@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
+import { parseRoadmapData } from "./parseRoadmap";
 
 import Spinner from "@/components/Spinner";
 import { Search } from "lucide-react";
@@ -114,7 +115,7 @@ const NuevoPuestoPage = () => {
                         if (result.status !== "fulfilled") return [];
 
                         try {
-                            const roadmap = JSON.parse(result.value.json.data) as {
+                            const roadmap = parseRoadmapData(result.value.json.data) as {
                                 lessons?: Array<{
                                     title: string;
                                     content: string;

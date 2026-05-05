@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 const RoleRow = ({ role }: { role: any }) => {
     const skills = useQuery(api.skills.getSkillsByRoleId, { roleId: role._id });
+    const users = useQuery(api.users.getUsersByRoleId, { roleId: role._id });
 
     const removeRole = useMutation(api.roles.deleteRoleById);
 
@@ -54,10 +55,31 @@ const RoleRow = ({ role }: { role: any }) => {
                     )}
                 </div>
             </td>
-            <td className="px-6 py-4"></td>
+            <td className="px-6 py-4">
+                <div className="flex flex-wrap gap-2">
+                    {users === undefined ? (
+                        <Spinner className="size-5" label="Cargando usuarios" />
+                    ) : users.length === 0 ? (
+                        <span className="text-xs text-neutral-400">Sin usuarios</span>
+                    ) : (
+                        <>
+                            {users.slice(0, 2).map((user: any) => (
+                                <span key={user._id} className="px-2 py-1 border border-neutral-300 bg-neutral-100 text-neutral-800 text-xs font-medium rounded-full">
+                                    {user.name}
+                                </span>
+                            ))}
+                            {users.length > 2 && (
+                                <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full">
+                                    +{users.length - 2}
+                                </span>
+                            )}
+                        </>
+                    )}
+                </div>
+            </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                    <Link href={`/admin/puestos/${role.name.replaceAll(' ', '-').toLowerCase()}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
+                    <Link href={`/admin/puestos/${role._id}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
                         <Eye className="size-4 text-neutral-600" />
                     </Link>
                     <button onClick={handleRemoveRole} className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
