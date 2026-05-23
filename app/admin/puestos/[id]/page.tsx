@@ -5,19 +5,21 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
 import { useQuery, useMutation } from "convex/react";
-import { Eye, Link, Search, Trash2 } from "lucide-react";
+import { Eye, Search, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import EmptyState from "../../_components/EmptyState";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { generateRoadmapsForNewSkills } from "./generateRoadmap";
+import Link from "next/link";
 
 const puestoNombrePage = () => {
     const params = useParams();
     const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
     const id = typeof rawId === "string" ? (rawId as Id<"roles">) : undefined;
 
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false)
+    const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
     const [editedName, setEditedName] = useState("");
     const [editedDescription, setEditedDescription] = useState("");
 
@@ -135,6 +137,9 @@ const puestoNombrePage = () => {
 
     const handleSave = async () => {
         if (!validateForm()) return;
+        if (isGeneratingRoadmap) return;
+
+        setIsGeneratingRoadmap(true);
 
         try {
             const skillsForRoadmap = getSkillsForRoadmapGeneration();
@@ -155,12 +160,15 @@ const puestoNombrePage = () => {
             await promise;
 
             if (skillsForRoadmap.length > 0) {
-                await generateRoadmapsForNewSkills(skillsForRoadmap, editedName, editedDescription, createLesson);
+                await generateRoadmapsForNewSkills(skillsForRoadmap, editedName, editedDescription, id!, createLesson);
             }
 
             setIsEditing(false);
         } catch (error) {
             console.error(error);
+            toast.error("Ocurrió un error al actualizar el puesto.");
+        } finally {
+            setIsGeneratingRoadmap(false);
         }
     };
 
@@ -179,8 +187,28 @@ const puestoNombrePage = () => {
 
     return (
         <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
-            <h2 className="text-lg font-medium text-neutral-900">Datos del puesto</h2>
-            <h3 className="text-md font-medium text-neutral-500">Edita y valida la información del puesto y sus habilidades requeridas.</h3>
+            <div className="flex flex-col my-4 md:mb-0">      
+                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 mb-1">
+                    <li className="inline-flex items-center gap-1 text-sm text-neutral-500">
+                        <Link href="/admin" className="transition-colors hover:text-foreground">Admin</Link>
+                    </li>
+                    <li className="inline-flex items-center text-sm text-neutral-500">
+                        <Link href="/admin/puestos" className="transition-colors hover:text-foreground gap-1 inline-flex">
+                            <span>/</span>
+                            <span>Puestos</span>
+                        </Link>
+                    </li>
+                    <li className="inline-flex items-center text-sm text-neutral-800">
+                        <Link href={`/admin/puestos/${role?._id}`} className="transition-colors hover:text-foreground gap-1 inline-flex">
+                            <span>/</span>
+                            <span>{role?.name}</span>
+                        </Link>
+                    </li>
+                </ol>
+
+                <h2 className="text-lg font-medium text-neutral-900">Datos del puesto</h2>
+                <h3 className="text-md font-medium text-neutral-500">Edita y valida la información del puesto y sus habilidades requeridas.</h3>
+            </div>
 
             <div className="flex w-full flex-col md:flex-row justify-center gap-4 mt-4 mb-8">
                 <div className="w-full flex flex-col md:w-1/2 md:mr-2 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/50 p-5">
@@ -278,15 +306,17 @@ const puestoNombrePage = () => {
                             <>
                                 <button
                                     type="button"
-                                    className="bg-default-300 cursor-pointer font-semibold text-white h-10 flex-1 rounded-lg transition-colors duration-300 hover:bg-default-400"
+                                    className='bg-default-300 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer font-semibold text-white h-10 flex-1 rounded-lg transition-colors duration-300 hover:bg-default-400'
                                     onClick={handleSave}
+                                    disabled={isGeneratingRoadmap}
                                 >
-                                    GUARDAR
+                                    {isGeneratingRoadmap ? "GUARDANDO..." : "GUARDAR"}
                                 </button>
                                 <button
                                     type="button"
-                                    className="bg-neutral-200 dark:bg-neutral-700 cursor-pointer font-semibold text-neutral-800 dark:text-neutral-100 h-10 flex-1 rounded-lg transition-colors duration-300 hover:bg-neutral-300 dark:hover:bg-neutral-600"
+                                    className="bg-neutral-200 dark:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer font-semibold text-neutral-800 dark:text-neutral-100 h-10 flex-1 rounded-lg transition-colors duration-300 hover:bg-neutral-300 dark:hover:bg-neutral-600"
                                     onClick={handleCancel}
+                                    disabled={isGeneratingRoadmap}
                                 >
                                     CANCELAR
                                 </button>
@@ -294,8 +324,9 @@ const puestoNombrePage = () => {
                         ) : (
                             <button
                                 type="button"
-                                className="bg-default-300 cursor-pointer font-semibold text-white h-10 w-38 rounded-lg transition-colors duration-300 hover:bg-default-400"
+                                className='bg-default-300 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer font-semibold text-white h-10 w-38 rounded-lg transition-colors duration-300 hover:bg-default-400'
                                 onClick={() => setIsEditing(true)}
+                                disabled={isGeneratingRoadmap}
                             >
                                 EDITAR
                             </button>

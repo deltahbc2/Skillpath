@@ -36,6 +36,7 @@ export default defineSchema({
 
     lessons: defineTable({
         skillId: v.id("skills"),
+        roleId: v.id("roles"),
         title: v.string(),
         level: v.optional(v.number()),
         description: v.optional(v.string()),

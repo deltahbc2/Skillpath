@@ -43,7 +43,7 @@ const Layout = ({
                 onClick={() => setIsCollapsed((prev) => !prev)}
                 title={isCollapsed ? "Abrir menú" : "Cerrar menú"}
                 aria-label={isCollapsed ? "Abrir menú" : "Cerrar menú"}
-                className={`${leftPosClass} fixed top-4 z-100 rounded-lg border border-neutral-200 bg-white p-2 text-neutral-700 hover:bg-neutral-100 transition-colors shadow-sm`}
+                className={`${leftPosClass} fixed top-4 z-10 rounded-lg border border-neutral-200 bg-white p-2 text-neutral-700 hover:bg-neutral-100 transition-colors shadow-sm`}
             >
                 {isCollapsed ? <Menu className="size-4" /> : <ChevronsLeft className="size-4" />}
             </button>

@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 
 export const createLesson = mutation({
     args: {
+        roleId: v.id("roles"),
         skillName: v.string(),
         title: v.string(),
         order: v.number(),
@@ -23,6 +24,7 @@ export const createLesson = mutation({
 
         const lessonId = await ctx.db.insert("lessons", {
             skillId: skill._id,
+            roleId: args.roleId,
             title: args.title,
             order: args.order,
             level: args.level,

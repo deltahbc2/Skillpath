@@ -10,6 +10,7 @@ import { parseRoadmapData } from "./parseRoadmap";
 import Spinner from "@/components/Spinner";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const NuevoPuestoPage = () => {
     const router = useRouter();
@@ -89,7 +90,11 @@ const NuevoPuestoPage = () => {
         });
 
         try {
-            await promise;
+            const roleId = await promise;
+
+            if (!roleId) {
+                throw new Error("No se pudo crear el puesto.");
+            }
 
             setIsGeneratingRoadmap(true);
 
@@ -132,6 +137,7 @@ const NuevoPuestoPage = () => {
 
                             return roadmap.lessons.map((lesson, index) =>
                                 createLesson({
+                                    roleId,
                                     skillName: result.value.skill,
                                     title: lesson.title,
                                     order: index + 1,
@@ -169,8 +175,28 @@ const NuevoPuestoPage = () => {
 
     return (
         <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
-            <h2 className="text-lg font-medium text-neutral-900">Agregar puesto</h2>
-            <h3 className="text-md font-medium text-neutral-500">Define un nuevo puesto y registra sus habilidades requeridas.</h3>
+            <div className="flex flex-col my-4 md:mb-0">      
+                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 mb-1">
+                    <li className="inline-flex items-center gap-1 text-sm text-neutral-500">
+                        <Link href="/admin" className="transition-colors hover:text-foreground">Admin</Link>
+                    </li>
+                    <li className="inline-flex items-center text-sm text-neutral-500">
+                        <Link href="/admin/puestos" className="transition-colors hover:text-foreground gap-1 inline-flex">
+                            <span>/</span>
+                            <span>Puestos</span>
+                        </Link>
+                    </li>
+                    <li className="inline-flex items-center text-sm text-neutral-800">
+                        <Link href="/admin/puestos/nuevo" className="transition-colors hover:text-foreground gap-1 inline-flex">
+                            <span>/</span>
+                            <span>Nuevo Puesto</span>
+                        </Link>
+                    </li>
+                </ol>
+
+                <h2 className="text-lg font-medium text-neutral-900">Agregar puesto</h2>
+                <h3 className="text-md font-medium text-neutral-500">Define un nuevo puesto y registra sus habilidades requeridas.</h3>
+            </div>
 
             <form onSubmit={onHandleSubmit} className="flex w-full flex-col md:flex-row justify-center gap-4 mt-4">
                 <div className="w-full flex flex-col md:w-1/2 md:mr-2 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/50 p-5">

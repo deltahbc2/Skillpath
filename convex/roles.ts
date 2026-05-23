@@ -114,7 +114,28 @@ export const deleteRoleById = mutation({
     args: {
         roleId: v.id("roles"),
     },
-    handler: async (ctx, args)=> {
-        return await ctx.db.delete(args.roleId);
+    handler: async (ctx, args) => {
+        const lessons = await ctx.db.query("lessons")
+            .filter((q: any) => q.eq(q.field("roleId"), args.roleId))
+            .collect();
+
+        const lessonIds = lessons.map((lesson: any) => lesson._id);
+
+        const quizzes = lessonIds.length > 0
+            ? await ctx.db.query("quizzes")
+                .collect()
+                .then(items => items.filter((quiz: any) => lessonIds.includes(quiz.lessonId)))
+            : [];
+
+        await Promise.all(quizzes.map((quiz: any) => ctx.db.delete(quiz._id)));
+        await Promise.all(lessons.map((lesson: any) => ctx.db.delete(lesson._id)));
+
+        const links = await ctx.db.query("rolesSkills")
+            .filter((q: any) => q.eq(q.field("roleId"), args.roleId))
+            .collect();
+
+        await Promise.all(links.map((link: any) => ctx.db.delete(link._id)));
+        
+        await ctx.db.delete(args.roleId);
     }
 })

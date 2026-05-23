@@ -1,7 +1,9 @@
 import { toast } from "sonner";
+import type { Id } from "@/convex/_generated/dataModel";
 import { parseRoadmapData } from "../nuevo/parseRoadmap";
 
 type CreateLessonMutation = (args: {
+    roleId: Id<"roles">;
     skillName: string;
     title: string;
     order: number;
@@ -19,6 +21,7 @@ export const generateRoadmapsForNewSkills = async (
     newSkills: string[],
     editedName: string,
     editedDescription: string,
+    roleId: Id<"roles">,
     createLesson: CreateLessonMutation
 ) => {
     
@@ -62,6 +65,7 @@ export const generateRoadmapsForNewSkills = async (
 
         return roadmap.lessons.map((lesson, index) =>
             createLesson({
+                roleId,
                 skillName: result.value.skill,
                 title: lesson.title,
                 order: lesson.order ?? index + 1,
