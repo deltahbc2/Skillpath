@@ -22,6 +22,7 @@ const RoleRow = ({ role }: { role: any }) => {
             {skills === undefined ? (
                 <Spinner/>
             ) : (
+                // cambiar por cantidad de colaboradores
                 <span className="px-2 py-1 bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 text-neutral-700 text-xs rounded-full">{skills.length}</span>
             )}
         </>

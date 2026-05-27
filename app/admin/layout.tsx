@@ -34,6 +34,10 @@ const Layout = ({
 
     const leftPosClass = useMemo(() => (isCollapsed ? "left-4 md:left-24" : "left-[85%] md:left-[19rem]"), [isCollapsed]);
 
+    const mainClass = useMemo(() => {
+        return `flex-1 min-w-0 pt-8 md:pt-4 min-h-screen ${isCollapsed ? 'md:ml-24' : 'md:ml-[19rem]'}`;
+    }, [isCollapsed]);
+
     return (
         <section className="relative flex overflow-hidden">
             <SideBar isCollapsed={isCollapsed} />
@@ -43,12 +47,12 @@ const Layout = ({
                 onClick={() => setIsCollapsed((prev) => !prev)}
                 title={isCollapsed ? "Abrir menú" : "Cerrar menú"}
                 aria-label={isCollapsed ? "Abrir menú" : "Cerrar menú"}
-                className={`${leftPosClass} fixed top-4 z-10 rounded-lg border border-neutral-200 bg-white p-2 text-neutral-700 hover:bg-neutral-100 transition-colors shadow-sm`}
+                className={`${leftPosClass} fixed top-4 z-50 rounded-lg border border-neutral-200 bg-white p-2 text-neutral-700 hover:bg-neutral-100 transition-colors shadow-sm`}
             >
                 {isCollapsed ? <Menu className="size-4" /> : <ChevronsLeft className="size-4" />}
             </button>
 
-            <main className="flex-1 min-w-0 pt-8 md:pt-4 min-h-screen">
+            <main className={mainClass}>
                 {children}
             </main>
         </section>

@@ -32,6 +32,16 @@ export const createUser = mutation({
     },
 });
 
+export const getUsers = query({
+    handler: async (ctx) => {
+        const roles = await ctx.db.query("users")
+            .filter(q => q.eq(q.field("admin"), false))
+            .collect();
+            
+        return roles;
+    }
+});
+
 export const getUsersByRoleId = query({
     args: {
         roleId: v.id("roles"),
@@ -42,3 +52,12 @@ export const getUsersByRoleId = query({
             .collect();
     }
 })
+
+export const deleteUserById = mutation({
+    args: {
+        userId: v.id("users"),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.delete("users", args.userId);
+    },
+});
