@@ -176,17 +176,17 @@ const NuevoPuestoPage = () => {
     return (
         <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <div className="flex flex-col my-4 md:mb-0">      
-                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 mb-1">
-                    <li className="inline-flex items-center gap-1 text-sm text-neutral-500">
+                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 dark:text-neutral-200 mb-1">
+                        <li className="inline-flex items-center gap-1 text-sm">
                         <Link href="/admin" className="transition-colors hover:text-foreground">Admin</Link>
                     </li>
-                    <li className="inline-flex items-center text-sm text-neutral-500">
+                    <li className="inline-flex items-center text-sm">
                         <Link href="/admin/puestos" className="transition-colors hover:text-foreground gap-1 inline-flex">
                             <span>/</span>
                             <span>Puestos</span>
                         </Link>
                     </li>
-                    <li className="inline-flex items-center text-sm text-neutral-800">
+                    <li className="inline-flex items-center text-sm text-neutral-800 dark:text-neutral-300">
                         <Link href="/admin/puestos/nuevo" className="transition-colors hover:text-foreground gap-1 inline-flex">
                             <span>/</span>
                             <span>Nuevo Puesto</span>
@@ -194,8 +194,8 @@ const NuevoPuestoPage = () => {
                     </li>
                 </ol>
 
-                <h2 className="text-lg font-medium text-neutral-900">Agregar puesto</h2>
-                <h3 className="text-md font-medium text-neutral-500">Define un nuevo puesto y registra sus habilidades requeridas.</h3>
+                <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-300">Agregar puesto</h2>
+                <h3 className="text-md font-medium text-neutral-500 dark:text-neutral-400">Define un nuevo puesto y registra sus habilidades requeridas.</h3>
             </div>
 
             <form onSubmit={onHandleSubmit} className="flex w-full flex-col md:flex-row justify-center gap-4 mt-4">

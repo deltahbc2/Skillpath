@@ -6,7 +6,7 @@ export const createUser = mutation({
         userId: v.string(),
         name: v.string(),
         email: v.string(),
-        phone: v.optional(v.number()),
+        phone: v.optional(v.string()),
         photo: v.optional(v.string()),
         role: v.id("roles"),
         cv: v.string(),

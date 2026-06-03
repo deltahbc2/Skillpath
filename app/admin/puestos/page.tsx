@@ -16,11 +16,11 @@ const RoleRow = ({ role, onDelete }: { role: any; onDelete: (role: any) => void 
     const users = useQuery(api.users.getUsersByRoleId, { roleId: role._id });
 
     return (
-        <tr key={role._id} className="hover:bg-neutral-50/50 transition-colors group">
+        <tr className="hover:bg-neutral-50/50 dark:hover:bg-neutral-700 transition-colors group">
             <td className="px-6 py-4">
                 <div className="flex flex-col">
-                    <div className="font-semibold text-neutral-900 text-md">{role.name}</div>
-                    <div className="text-sm text-neutral-500 mt-1">{role.description}</div>
+                    <div className="font-semibold text-neutral-900 dark:text-neutral-300 text-md">{role.name}</div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{role.description}</div>
                 </div>
             </td>
             <td className="px-6 py-4">
@@ -69,8 +69,8 @@ const RoleRow = ({ role, onDelete }: { role: any; onDelete: (role: any) => void 
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                    <Link href={`/admin/puestos/${role._id}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors" title="Ver">
-                        <Eye className="size-4 text-neutral-600" />
+                    <Link href={`/admin/puestos/${role._id}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors  text-neutral-600 dark:text-neutral-300 hover:dark:text-neutral-700" title="Ver">
+                        <Eye className="size-4" />
                     </Link>
                     <button onClick={() => onDelete(role)} className="p-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" title="Eliminar">
                         <Trash2 className="size-4 text-red-500" />
@@ -122,11 +122,11 @@ const puestosPage = () => {
         <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <div className="flex flex-col md:flex-row w-full items-start md:items-center justify-between mb-4">
                 <div className="flex flex-col my-4 md:mb-0">
-                    <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 mb-1">
-                        <li className="inline-flex items-center gap-1 text-sm text-neutral-500">
+                    <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 dark:text-neutral-200 mb-1">
+                        <li className="inline-flex items-center gap-1 text-sm">
                             <Link href="/admin" className="transition-colors hover:text-foreground">Admin</Link>
                         </li>
-                        <li className="inline-flex items-center text-sm text-neutral-800">
+                        <li className="inline-flex items-center text-sm text-neutral-800 dark:text-neutral-300">
                             <Link href="/admin/puestos" className="transition-colors hover:text-foreground gap-1 inline-flex">
                                 <span>/</span>
                                 <span>Puestos</span>
@@ -134,8 +134,8 @@ const puestosPage = () => {
                         </li>
                     </ol>
 
-                    <h2 className="text-lg font-medium text-neutral-900">Directorio de Puestos</h2>
-                    <h3 className="text-md font-medium text-neutral-500">Gestiona y monitorea los puestos existentes en tu organización.</h3>
+                    <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-300">Directorio de Puestos</h2>
+                    <h3 className="text-md font-medium text-neutral-500 dark:text-neutral-400">Gestiona y monitorea los puestos existentes en tu organización.</h3>
                 </div>
 
                 <Link href='/admin/puestos/nuevo' className="py-2 px-3 bg-default-300 hover:bg-[#30aa8580] text-white rounded-md cursor-pointer">Añadir Puesto</Link>
@@ -148,24 +148,24 @@ const puestosPage = () => {
             ): roles.length === 0 ? (
                 <EmptyState/>
             ) : (
-            <div className="bg-white rounded-3xl border border-neutral-100 overflow-auto shadow-sm">
+            <div className="bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 overflow-auto shadow-sm">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-neutral-50/80 border-b border-neutral-100">
-                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Puesto</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Habilidades</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Colaboradores</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-right">Acciones</th>
+                        <tr className="bg-neutral-50/80 dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700">
+                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider">Puesto</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider">Habilidades</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider">Colaboradores</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-50">
+                    <tbody className="divide-y divide-neutral-50 dark:divide-neutral-700">
                         {roles.map((role) => (
                             <RoleRow key={role._id} role={role} onDelete={requestDelete} />
                         ))}
                     </tbody>
                 </table>
 
-                <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50 flex items-center justify-between text-sm text-neutral-600">
+                <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-300">
                     <span>Total: {roles.length} puestos</span>
                 </div>
             </div>

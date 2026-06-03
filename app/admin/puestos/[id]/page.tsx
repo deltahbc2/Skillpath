@@ -6,7 +6,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 
 import { useQuery, useMutation } from "convex/react";
 import { Eye, Search, Trash2 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import EmptyState from "../../_components/EmptyState";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import Link from "next/link";
 
 const puestoNombrePage = () => {
     const params = useParams();
+    const router = useRouter();
     const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
     const id = typeof rawId === "string" ? (rawId as Id<"roles">) : undefined;
 
@@ -26,13 +27,11 @@ const puestoNombrePage = () => {
     const [skillInput, setSkillInput] = useState("");
     const [editedSkills, setEditedSkills] = useState<string[]>([]);
 
-    const role = useQuery(
-        api.roles.getRoleById,
-        id ? { id } : "skip"
-    );
+    const roles = useQuery(api.roles.getRoles);
+    const role = roles?.find((item) => item._id === id) ?? null;
 
-    const users = useQuery(api.users.getUsersByRoleId, id ? { roleId: id } : "skip");
-    const skills = useQuery(api.skills.getSkillsByRoleId, id ? { roleId: id } : "skip");
+    const users = useQuery(api.users.getUsersByRoleId, role ? { roleId: role._id } : "skip");
+    const skills = useQuery(api.skills.getSkillsByRoleId, role ? { roleId: role._id } : "skip");
     const existingSkills = useQuery(
         api.skills.getSkillsByNames,
         editedSkills.length > 0 ? { skillNames: editedSkills } : "skip"
@@ -54,6 +53,12 @@ const puestoNombrePage = () => {
             setEditedDescription(role.description || "");
         }
     }, [role, isEditing]);
+
+    useEffect(() => {
+        if (roles !== undefined && role === null) {
+            router.replace("/admin/puestos");
+        }
+    }, [role, roles, router]);
 
     useEffect(() => {
         if (!isEditing && (skills?.length || 0) > 0) {
@@ -179,7 +184,7 @@ const puestoNombrePage = () => {
         setIsEditing(false);
     };
 
-    if(role === undefined) return (
+    if(role === undefined || roles === undefined || role === null) return (
         <div className="w-full flex items-center justify-center py-20">
             <Spinner/>
         </div>
@@ -188,17 +193,17 @@ const puestoNombrePage = () => {
     return (
         <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
             <div className="flex flex-col my-4 md:mb-0">      
-                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 mb-1">
-                    <li className="inline-flex items-center gap-1 text-sm text-neutral-500">
+                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 dark:text-neutral-200 mb-1">
+                    <li className="inline-flex items-center gap-1 text-sm">
                         <Link href="/admin" className="transition-colors hover:text-foreground">Admin</Link>
                     </li>
-                    <li className="inline-flex items-center text-sm text-neutral-500">
+                    <li className="inline-flex items-center text-sm">
                         <Link href="/admin/puestos" className="transition-colors hover:text-foreground gap-1 inline-flex">
                             <span>/</span>
                             <span>Puestos</span>
                         </Link>
                     </li>
-                    <li className="inline-flex items-center text-sm text-neutral-800">
+                    <li className="inline-flex items-center text-sm text-neutral-800 dark:text-neutral-300">
                         <Link href={`/admin/puestos/${role?._id}`} className="transition-colors hover:text-foreground gap-1 inline-flex">
                             <span>/</span>
                             <span>{role?.name}</span>
@@ -206,8 +211,8 @@ const puestoNombrePage = () => {
                     </li>
                 </ol>
 
-                <h2 className="text-lg font-medium text-neutral-900">Datos del puesto</h2>
-                <h3 className="text-md font-medium text-neutral-500">Edita y valida la información del puesto y sus habilidades requeridas.</h3>
+                <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-300">Datos del puesto</h2>
+                <h3 className="text-md font-medium text-neutral-500 dark:text-neutral-400">Edita y valida la información del puesto y sus habilidades requeridas.</h3>
             </div>
 
             <div className="flex w-full flex-col md:flex-row justify-center gap-4 mt-4 mb-8">
@@ -335,7 +340,7 @@ const puestoNombrePage = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl border border-neutral-100 overflow-auto shadow-sm">
+            <div className="bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 overflow-auto shadow-sm">
                 {users?.length === 0 ? (
                     <EmptyState title="No hay colaboradores asignados" description="No hay colaboradores asignados a este puesto." />
                 ) : (

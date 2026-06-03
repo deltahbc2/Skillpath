@@ -1,40 +1,20 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import Link from "next/link";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { skillMatchers } from "@/utils/regex";
+import { toast } from "sonner";
 
-const skillOptions = [
-    "React",
-    "HTML",
-    "CSS",
-    "JavaScript",
-    "TypeScript",
-    "Next.js",
-    "Node.js",
-    "Tailwind",
-    "Git",
-    "SQL",
-];
-
-const skillMatchers: Record<string, RegExp[]> = {
-    React: [/\breact(?:\.js)?\b/i],
-    HTML: [/\bhtml(?:5)?\b/i],
-    CSS: [/\bcss(?:3)?\b/i, /\bsass\b/i, /\bscss\b/i],
-    JavaScript: [/\bjavascript\b/i, /\becmascript\b/i, /\bjs\b/i],
-    TypeScript: [/\btypescript\b/i, /\bts\b/i],
-    "Next.js": [/\bnext(?:\.js)?\b/i],
-    "Node.js": [/\bnode(?:\.js)?\b/i, /\bexpress\b/i],
-    Tailwind: [/\btailwind(?:css)?\b/i],
-    Git: [/\bgit\b/i, /\bgithub\b/i, /\bgitlab\b/i],
-    SQL: [/\bsql\b/i, /\bpostgres(?:ql)?\b/i, /\bmysql\b/i, /\bsqlite\b/i],
-};
-
-const detectSkillsFromText = (text: string) => {
-    if (!text.trim()) {
+const detectSkillsFromText = (text: string, skills: string[]) => {
+    if (!text.trim() || skills.length === 0) {
         return [];
     }
-
-    return skillOptions.filter((skill) => {
-        const patterns = skillMatchers[skill] ?? [];
+    
+    return skills.filter((skill) => {
+        const patterns = skillMatchers[skill.toLowerCase()] ?? [];
         return patterns.some((pattern) => pattern.test(text));
     });
 };
@@ -44,10 +24,35 @@ const nuevoEmpleadoPage = () => {
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [pdfError, setPdfError] = useState<string>("");
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+    const [extractedText, setExtractedText] = useState<string>("");
+    const [selectedRoleId, setSelectedRoleId] = useState<Id<"roles"> | "">("");
     const [isExtractingSkills, setIsExtractingSkills] = useState<boolean>(false);
     const [skillsError, setSkillsError] = useState<string>("");
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("user.png");
+
+    const [name, setName] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [phone, setPhone] = useState<string>("");
+
+    const roles = useQuery(api.roles.getRoles);
+
+    const createUser = useMutation(api.users.createUser);
+
+    const roleSkills = useQuery(
+        api.skills.getSkillsByRoleId,
+        selectedRoleId ? { roleId: selectedRoleId } : "skip"
+    );
+    
+    const availableRoleSkills = useMemo(
+        () => (roleSkills ?? []).filter((skill): skill is NonNullable<typeof skill> => skill !== null),
+        [roleSkills]
+    );
+
+    useEffect(() => {
+        const roleSkillNames = availableRoleSkills.map((skill) => skill.name);
+        setSelectedSkills(detectSkillsFromText(extractedText, roleSkillNames));
+    }, [availableRoleSkills, extractedText]);
 
     useEffect(() => {
         if (!pdfFile) {
@@ -85,6 +90,7 @@ const nuevoEmpleadoPage = () => {
             setPdfError("");
             setSkillsError("");
             setSelectedSkills([]);
+            setExtractedText("");
             return;
         }
 
@@ -96,11 +102,13 @@ const nuevoEmpleadoPage = () => {
             setPdfError("Solo se permiten archivos PDF.");
             setSkillsError("");
             setSelectedSkills([]);
+            setExtractedText("");
             return;
         }
 
         setPdfError("");
         setSkillsError("");
+        setExtractedText("");
         setPdfFile(selected);
 
         try {
@@ -119,11 +127,12 @@ const nuevoEmpleadoPage = () => {
                 throw new Error(data.error ?? "No se pudo analizar el PDF.");
             }
 
-            const extracted = detectSkillsFromText(data.text ?? "");
-            setSelectedSkills(extracted);
+            setExtractedText(data.text ?? "");
         } catch (error) {
             setSkillsError(error instanceof Error ? error.message : "No se pudieron extraer habilidades del PDF.");
+            setExtractedText("");
         } finally {
+            console.log(extractedText);
             setIsExtractingSkills(false);
         }
     };
@@ -134,6 +143,12 @@ const nuevoEmpleadoPage = () => {
                 ? prev.filter((item) => item !== skill)
                 : [...prev, skill]
         );
+    };
+
+    const handleRoleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedRoleId(event.target.value as Id<"roles"> | "");
+        setSelectedSkills([]);
+        setSkillsError("");
     };
 
     const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -155,11 +170,79 @@ const nuevoEmpleadoPage = () => {
         setPhotoFile(selected);
     };
 
+    const validateForm = () => {
+        if(!name.trim()) {
+            toast.error("Nombre del colaborador obligatorio.");
+            return false;
+        }
+        if(!email.trim()) {
+            toast.error("Correo electrónico del colaborador obligatorio.");
+            return false;
+        }
+        if(!phone.trim()) {
+            toast.error("Número de teléfono del colaborador obligatorio.");
+            return false;
+        }
+        if(!selectedRoleId) {
+            toast.error("Puesto del colaborador obligatorio.");
+            return false;
+        }
+
+        if(!pdfFile) {
+            toast.error("CV del colaborador obligatorio.");
+            return false;
+        }
+        
+        return true;
+    };
+    
+    const onHandleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if(!validateForm()) return;
+
+        const promise = createUser({
+            name: name.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            photo: photoPreviewUrl !== "/user.png" ? photoPreviewUrl : undefined,
+            role: selectedRoleId as Id<"roles">,
+            cv: previewUrl,
+        });
+
+        toast.promise(promise, {
+            loading: "Cargando colaborador...",
+            success: "Colaborador cargado exitosamente!",
+            error: "Error al cargar el colaborador."
+        });
+    };
+
     return (
         <section className="w-full max-w-300 flex flex-col py-8 px-8 mx-auto">
-            <h2 className="text-lg font-medium text-neutral-900">Registrar colaborador</h2>
-            <h3 className="text-md font-medium text-neutral-500">Registra un nuevo colaborador, asigna su puesto y comienza su proceso de capacitación.</h3>
-            <form className="flex w-full flex-col md:flex-row items-center justify-center gap-4 mt-4">
+            <div className="flex flex-col my-4 md:mb-0">      
+                <ol className="flex flex-wrap items-center gap-2 text-md text-neutral-500 dark:text-neutral-200 mb-1">
+                        <li className="inline-flex items-center gap-1 text-sm">
+                        <Link href="/admin" className="transition-colors hover:text-foreground">Admin</Link>
+                    </li>
+                    <li className="inline-flex items-center text-sm">
+                        <Link href="/admin/colaboradores" className="transition-colors hover:text-foreground gap-1 inline-flex">
+                            <span>/</span>
+                            <span>Colaboradores</span>
+                        </Link>
+                    </li>
+                    <li className="inline-flex items-center text-sm text-neutral-800 dark:text-neutral-300">
+                        <Link href="/admin/colaboradores/nuevo" className="transition-colors hover:text-foreground gap-1 inline-flex">
+                            <span>/</span>
+                            <span>Nuevo Colaborador</span>
+                        </Link>
+                    </li>
+                </ol>
+
+                <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-300">Agregar colaborador</h2>
+                <h3 className="text-md font-medium text-neutral-500 dark:text-neutral-400">Registra un nuevo colaborador y asigna su puesto.</h3>
+            </div>
+
+            <form onSubmit={onHandleSubmit} className="flex w-full flex-col md:flex-row items-center justify-center gap-4 mt-4">
                 <div className="w-full md:w-1/2 flex justify-center mb-4 md:mb-0">
                     <div className="w-full max-w-xl h-[60vh] md:h-[80vh] max-h-150 rounded-2xl bg-neutral-200 dark:bg-neutral-800 p-4">
                         {!previewUrl ? (
@@ -230,12 +313,22 @@ const nuevoEmpleadoPage = () => {
                                 type="text"
                                 id="nombre"
                                 name="nombre"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className=' placeholder:text-neutral-600 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 p-1 px-2 text-2xl font-semibold focus:outline-none w-full rounded-md mb-2'
                                 placeholder="Nombre"
                             />
-                            <select defaultValue="select" name="puesto" id="puesto" className="text-md text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 p-2 focus:outline-none w-full rounded-md">
-                                <option className="text-neutral-900" value="select" disabled>Selecciona un puesto</option>
-                                <option className="text-neutral-900" value="frontend">Front End Developer</option>
+                            <select
+                                value={selectedRoleId}
+                                onChange={handleRoleChange}
+                                name="puesto"
+                                id="puesto"
+                                className="text-md text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 p-2 focus:outline-none w-full rounded-md"
+                            >
+                                <option className="text-neutral-900" value="" disabled>Selecciona un puesto</option>
+                                {roles?.map((role) => (
+                                    <option key={role._id} className="text-neutral-900" value={role._id}>{role.name}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -244,6 +337,8 @@ const nuevoEmpleadoPage = () => {
                             type="email"
                             id='email'
                             name="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 py-2 px-3 focus:outline-none w-full md:w-[60%] rounded-md'
                             placeholder="Correo electronico"
                         />
@@ -251,48 +346,52 @@ const nuevoEmpleadoPage = () => {
                             type="text"
                             id='telefono'
                             name="telefono"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
                             className='text-md placeholder:text-neutral-500 dark:placeholder:text-neutral-300 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-800 py-2 px-3 focus:outline-none w-full md:w-[40%] rounded-md'
                             placeholder="Teléfono"
                         />
                     </div>
                     
-                    <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
-                        <div className="mb-3 flex items-center justify-between">
-                            <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-100">Habilidades</p>
-                            <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{selectedSkills.length} / {skillOptions.length}</span>
+                    {selectedRoleId && (
+                        <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
+                            <div className="mb-3 flex items-center justify-between">
+                                <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-100">Habilidades</p>
+                                <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{selectedSkills.length} / {roleSkills?.length || 0}</span>
+                            </div>
+
+                            {isExtractingSkills && (
+                                <p className="mb-3 text-xs font-medium text-neutral-500 dark:text-neutral-400">Analizando CV para detectar habilidades...</p>
+                            )}
+
+                            {skillsError && (
+                                <p className="mb-3 text-xs font-semibold text-red-700 dark:text-red-400">{skillsError}</p>
+                            )}
+
+                            <div className="flex flex-wrap gap-2">
+                                {availableRoleSkills.map((skill) => {
+                                    const isSelected = selectedSkills.includes(skill.name);
+
+                                    return (
+                                        <button
+                                            key={skill._id}
+                                            type="button"
+                                            onClick={() => toggleSkill(skill.name)}
+                                            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-300 ${
+                                                isSelected
+                                                    ? "border-[#30aa85] bg-[#30aa85] text-white"
+                                                    : "border-neutral-300 bg-neutral-100 text-neutral-700 hover:border-[#30aa85]/60 hover:text-[#30aa85] dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 cursor-pointer"
+                                            }`}
+                                        >
+                                            {skill.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <input type="hidden" name="skills" value={selectedSkills.join(",")} />
                         </div>
-
-                        {isExtractingSkills && (
-                            <p className="mb-3 text-xs font-medium text-neutral-500 dark:text-neutral-400">Analizando CV para detectar habilidades...</p>
-                        )}
-
-                        {skillsError && (
-                            <p className="mb-3 text-xs font-semibold text-red-700 dark:text-red-400">{skillsError}</p>
-                        )}
-
-                        <div className="flex flex-wrap gap-2">
-                            {skillOptions.map((skill) => {
-                                const isSelected = selectedSkills.includes(skill);
-
-                                return (
-                                    <button
-                                        key={skill}
-                                        type="button"
-                                        onClick={() => toggleSkill(skill)}
-                                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-300 ${
-                                            isSelected
-                                                ? "border-[#30aa85] bg-[#30aa85] text-white"
-                                                : "border-neutral-300 bg-neutral-100 text-neutral-700 hover:border-[#30aa85]/60 hover:text-[#30aa85] dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 cursor-pointer"
-                                        }`}
-                                    >
-                                        {skill}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <input type="hidden" name="skills" value={selectedSkills.join(",")} />
-                    </div>
+                    )}
                         
                     <button type="submit" className="bg-default-300 cursor-pointer font-semibold text-white h-10 w-38 rounded-lg transition-colors duration-300">GUARDAR</button>
                 </div>

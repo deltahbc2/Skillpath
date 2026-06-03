@@ -6,7 +6,7 @@ export default defineSchema({
         userId: v.string(),
         name: v.string(),
         email: v.string(),
-        phone: v.optional(v.number()),
+        phone: v.optional(v.string()),
         photo: v.optional(v.string()),
         role: v.optional(v.id("roles")),
         cv: v.optional(v.string()),
