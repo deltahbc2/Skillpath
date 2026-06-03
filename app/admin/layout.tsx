@@ -1,9 +1,14 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronsLeft, Menu } from "lucide-react";
 import SideBar from "./_components/sidebar";
 import { usePathname } from "next/navigation";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
+import AccessGateLoading from "./_components/AccessGateLoading";
+import AccessDeniedState from "./_components/AccessDeniedState";
+import { useUser } from "@clerk/react";
 
 const Layout = ({
     children
@@ -12,6 +17,18 @@ const Layout = ({
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const pathname = usePathname();
+    const { isLoaded, isSignedIn, user } = useUser();
+    const email = user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase();
+    const canLookupUser = isLoaded && isSignedIn && Boolean(email);
+    const currentUser = useQuery(
+        api.users.getCurrentUserByEmail,
+        canLookupUser ? { email: email! } : "skip"
+    );
+    const leftPosClass = useMemo(() => (isCollapsed ? "left-4 md:left-24" : "left-[85%] md:left-[19rem]"), [isCollapsed]);
+
+    const mainClass = useMemo(() => {
+        return `flex-1 min-w-0 pt-8 md:pt-4 min-h-screen ${isCollapsed ? 'md:ml-24' : 'md:ml-[19rem]'}`;
+    }, [isCollapsed]);
 
     useEffect(() => {
         const mediaQuery = window.matchMedia("(min-width: 768px)");
@@ -32,11 +49,13 @@ const Layout = ({
         setIsCollapsed(true);
     }, [pathname]);
 
-    const leftPosClass = useMemo(() => (isCollapsed ? "left-4 md:left-24" : "left-[85%] md:left-[19rem]"), [isCollapsed]);
+    if (!isLoaded || (canLookupUser && currentUser === undefined)) {
+        return <AccessGateLoading />;
+    }
 
-    const mainClass = useMemo(() => {
-        return `flex-1 min-w-0 pt-8 md:pt-4 min-h-screen ${isCollapsed ? 'md:ml-24' : 'md:ml-[19rem]'}`;
-    }, [isCollapsed]);
+    if (!isSignedIn || !email || !currentUser) {
+        return <AccessDeniedState />;
+    }
 
     return (
         <section className="relative flex overflow-hidden">

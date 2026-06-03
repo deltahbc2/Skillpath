@@ -1,12 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { skillMatchers } from "@/utils/regex";
 import { toast } from "sonner";
+import { useEdgeStore } from "@/lib/edgestore";
 
 const detectSkillsFromText = (text: string, skills: string[]) => {
     if (!text.trim() || skills.length === 0) {
@@ -20,8 +23,11 @@ const detectSkillsFromText = (text: string, skills: string[]) => {
 };
 
 const nuevoEmpleadoPage = () => {
+    const router = useRouter();
+
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [pdfUploadUrl, setPdfUploadUrl] = useState<string | null>(null);
     const [pdfError, setPdfError] = useState<string>("");
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [extractedText, setExtractedText] = useState<string>("");
@@ -30,12 +36,16 @@ const nuevoEmpleadoPage = () => {
     const [skillsError, setSkillsError] = useState<string>("");
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("user.png");
+    const [photoUploadUrl, setPhotoUploadUrl] = useState<string | null>(null);
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState<boolean>(false);
+    const [isUploadingCv, setIsUploadingCv] = useState<boolean>(false);
 
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
 
     const roles = useQuery(api.roles.getRoles);
+    const { edgestore } = useEdgeStore();
 
     const createUser = useMutation(api.users.createUser);
 
@@ -57,11 +67,13 @@ const nuevoEmpleadoPage = () => {
     useEffect(() => {
         if (!pdfFile) {
             setPreviewUrl("");
+            setPdfUploadUrl(null);
             return;
         }
 
         const objectUrl = URL.createObjectURL(pdfFile);
         setPreviewUrl(objectUrl);
+        setPdfUploadUrl(null);
 
         return () => {
             URL.revokeObjectURL(objectUrl);
@@ -71,11 +83,13 @@ const nuevoEmpleadoPage = () => {
     useEffect(() => {
         if (!photoFile) {
             setPhotoPreviewUrl("/user.png");
+            setPhotoUploadUrl(null);
             return;
         }
 
         const objectUrl = URL.createObjectURL(photoFile);
         setPhotoPreviewUrl(objectUrl);
+        setPhotoUploadUrl(null);
 
         return () => {
             URL.revokeObjectURL(objectUrl);
@@ -91,6 +105,7 @@ const nuevoEmpleadoPage = () => {
             setSkillsError("");
             setSelectedSkills([]);
             setExtractedText("");
+            setPdfUploadUrl(null);
             return;
         }
 
@@ -103,6 +118,7 @@ const nuevoEmpleadoPage = () => {
             setSkillsError("");
             setSelectedSkills([]);
             setExtractedText("");
+            setPdfUploadUrl(null);
             return;
         }
 
@@ -156,6 +172,7 @@ const nuevoEmpleadoPage = () => {
 
         if (!selected) {
             setPhotoFile(null);
+            setPhotoUploadUrl(null);
             return;
         }
 
@@ -164,10 +181,57 @@ const nuevoEmpleadoPage = () => {
 
         if (!isImageByType && !isImageByExt) {
             setPhotoFile(null);
+            setPhotoUploadUrl(null);
             return;
         }
 
         setPhotoFile(selected);
+    };
+
+    const uploadPhoto = async () => {
+        if (!photoFile) {
+            return null;
+        }
+
+        if (photoUploadUrl) {
+            return photoUploadUrl;
+        }
+
+        setIsUploadingPhoto(true);
+
+        try {
+            const uploaded = await edgestore.publicFiles.upload({
+                file: photoFile,
+            });
+
+            setPhotoUploadUrl(uploaded.url);
+            return uploaded.url;
+        } finally {
+            setIsUploadingPhoto(false);
+        }
+    };
+
+    const uploadCv = async () => {
+        if (!pdfFile) {
+            return null;
+        }
+
+        if (pdfUploadUrl) {
+            return pdfUploadUrl;
+        }
+
+        setIsUploadingCv(true);
+
+        try {
+            const uploaded = await edgestore.publicFiles.upload({
+                file: pdfFile,
+            });
+
+            setPdfUploadUrl(uploaded.url);
+            return uploaded.url;
+        } finally {
+            setIsUploadingCv(false);
+        }
     };
 
     const validateForm = () => {
@@ -201,20 +265,29 @@ const nuevoEmpleadoPage = () => {
 
         if(!validateForm()) return;
 
-        const promise = createUser({
-            name: name.trim(),
-            email: email.trim(),
-            phone: phone.trim(),
-            photo: photoPreviewUrl !== "/user.png" ? photoPreviewUrl : undefined,
-            role: selectedRoleId as Id<"roles">,
-            cv: previewUrl,
-        });
+        const promise = (async () => {
+            const [uploadedPhotoUrl, uploadedCvUrl] = await Promise.all([
+                uploadPhoto(),
+                uploadCv(),
+            ]);
+
+            return createUser({
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone.trim(),
+                photo: uploadedPhotoUrl ?? undefined,
+                role: selectedRoleId as Id<"roles">,
+                cv: uploadedCvUrl ?? previewUrl,
+            });
+        })();
 
         toast.promise(promise, {
-            loading: "Cargando colaborador...",
+            loading: isUploadingPhoto || isUploadingCv ? "Subiendo archivos..." : "Cargando colaborador...",
             success: "Colaborador cargado exitosamente!",
             error: "Error al cargar el colaborador."
         });
+
+        router.push("/admin/colaboradores");
     };
 
     return (
@@ -393,7 +466,13 @@ const nuevoEmpleadoPage = () => {
                         </div>
                     )}
                         
-                    <button type="submit" className="bg-default-300 cursor-pointer font-semibold text-white h-10 w-38 rounded-lg transition-colors duration-300">GUARDAR</button>
+                    <button
+                        type="submit"
+                        className="bg-default-300 cursor-pointer font-semibold text-white h-10 w-38 rounded-lg transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-70"
+                        disabled={isUploadingPhoto || isUploadingCv}
+                    >
+                        {isUploadingPhoto || isUploadingCv ? "SUBIENDO..." : "GUARDAR"}
+                    </button>
                 </div>
             </form>
         </section>

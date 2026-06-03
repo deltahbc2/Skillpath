@@ -1,6 +1,6 @@
 "use client";
 
-import { SignInButton } from "@clerk/react";
+import { SignInButton, SignOutButton } from "@clerk/react";
 import { useConvexAuth } from "convex/react";
 import Link from "next/link";
 
@@ -31,7 +31,12 @@ const Hero = () => {
                         )}
 
                         {isAuthenticated && !isLoading && (
-                            <Link href="/admin" className="cursor-pointer items-center gap-2 bg-default-500 text-white py-2 px-4 rounded-lg font-semibold text-lg transition-colors duration-300 hover:bg-default-400">Ir a mi ruta</Link>
+                            <div className="flex items-center gap-4">
+                                <Link href="/admin" className="cursor-pointer items-center gap-2 bg-default-500 text-white py-2 px-4 rounded-lg font-semibold text-lg transition-colors duration-300 hover:bg-default-400">Ir a mi ruta</Link>
+                                <SignOutButton>
+                                    <span className="cursor-pointer inline-block bg-red-500 text-white py-2 px-4 rounded-lg font-semibold text-lg transition-colors duration-300 hover:bg-red-600">Cerrar Sesión</span>
+                                </SignOutButton>
+                            </div>
                         )}
                     </div>
                 </div>

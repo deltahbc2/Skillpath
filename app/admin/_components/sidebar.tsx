@@ -1,5 +1,6 @@
 "use client";
 
+import { SignOutButton } from "@clerk/react";
 import { Briefcase, LayoutDashboard, LogOut, Route, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -88,14 +89,14 @@ const SideBar = ({ isCollapsed }: SideBarProps) => {
             </div>
 
             <div className={`p-4 border-t border-neutral-300 dark:border-neutral-700 flex flex-col gap-2 ${isCollapsed ? "items-center" : ""}`}>
-                <a
-                    href="#"
-                    title="Cerrar Sesión"
-                    className={`flex items-center rounded-xl text-red-500 hover:bg-red-50 font-medium transition-colors ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-2.5"}`}
-                >
-                    <LogOut/>
-                    {!isCollapsed && <span>Cerrar Sesión</span>}
-                </a>
+                <SignOutButton>
+                    <span
+                        className={`flex items-center rounded-xl cursor-pointer text-red-500 hover:bg-red-50 font-medium transition-colors ${isCollapsed ? "justify-center w-12 h-12 p-0" : "gap-3 px-4 py-2.5"}`}
+                    >
+                        <LogOut/>
+                        {!isCollapsed && <span>Cerrar Sesión</span>}
+                    </span>
+                </SignOutButton>
             </div>
         </aside>
     );

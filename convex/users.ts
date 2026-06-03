@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 
 export const createUser = mutation({
     args: {
-        userId: v.string(),
+        clerkUserId: v.optional(v.string()),
         name: v.string(),
         email: v.string(),
         phone: v.optional(v.string()),
@@ -13,16 +13,26 @@ export const createUser = mutation({
         // admin: v.boolean(),
     },
     handler: async (ctx, args) => {
-        const existing = await ctx.db.query("users")
-            .filter(q => q.eq(q.field("userId"), args.userId))
+        const normalizedEmail = args.email.trim().toLowerCase();
+
+        const existingByClerkId = args.clerkUserId
+            ? await ctx.db.query("users")
+                .filter(q => q.eq(q.field("clerkUserId"), args.clerkUserId))
+                .first()
+            : null;
+
+        if (existingByClerkId) return existingByClerkId;
+
+        const existingByEmail = await ctx.db.query("users")
+            .filter(q => q.eq(q.field("email"), normalizedEmail))
             .first();
 
-        if (existing) return existing;
+        if (existingByEmail) return existingByEmail;
 
         return await ctx.db.insert("users", {
-            userId: args.userId,
+            clerkUserId: args.clerkUserId,
             name: args.name,
-            email: args.email,
+            email: normalizedEmail,
             phone: args.phone,
             photo: args.photo,
             role: args.role,
@@ -30,6 +40,54 @@ export const createUser = mutation({
             admin: false,
         });
     },
+});
+
+export const getCurrentUser = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return null;
+        }
+
+        const byClerkUserId = await ctx.db.query("users")
+            .filter(q => q.eq(q.field("clerkUserId"), identity.subject))
+            .first();
+
+        return byClerkUserId;
+    }
+});
+
+export const getCurrentUserByEmail = query({
+    args: {
+        email: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const normalizedEmail = args.email.trim().toLowerCase();
+        const users = await ctx.db.query("users").collect();
+
+        return users.find((user) => user.email.trim().toLowerCase() === normalizedEmail) ?? null;
+    }
+});
+
+export const syncCurrentUser = mutation({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return null;
+        }
+
+        const existingByClerkUserId = await ctx.db.query("users")
+            .filter(q => q.eq(q.field("clerkUserId"), identity.subject))
+            .first();
+
+        if (existingByClerkUserId) {
+            return existingByClerkUserId;
+        }
+
+        return null;
+    }
 });
 
 export const getUsers = query({
