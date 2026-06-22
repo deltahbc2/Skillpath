@@ -18,7 +18,7 @@ const SearchInput = ({ value = "", onChange, placeholder = "Buscar..." }: Props)
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="text-sm font-medium placeholder:text-neutral-500 text-neutral-800 border border-neutral-300 py-2 px-3 pl-10 w-full rounded-md focus:outline-none"
+        className="text-sm font-medium placeholder:text-neutral-500 text-neutral-800 dark:text-neutral-200 border border-neutral-300 py-2 px-3 pl-10 w-full rounded-md focus:outline-none"
       />
     </div>
   );

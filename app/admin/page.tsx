@@ -15,15 +15,15 @@ import { Users, Briefcase, Calendar, UserPlus } from "lucide-react";
 import Skeleton from "@/components/Skeleton";
 
 const RoleRow = ({ role }: { role: any }) => {
-    const skills = useQuery(api.skills.getSkillsByRoleId, { roleId: role._id });
+    const users = useQuery(api.users.getUsersByRoleId, { roleId: role._id });
 
     return (
         <>
-            {skills === undefined ? (
+            {users === undefined ? (
                 <Spinner/>
             ) : (
                 // cambiar por cantidad de colaboradores
-                <span className="px-2 py-1 bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 text-neutral-700 text-xs rounded-full">{skills.length}</span>
+                <span className="px-2 py-1 bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 text-neutral-700 text-xs rounded-full">{users.length}</span>
             )}
         </>
     )
@@ -31,10 +31,9 @@ const RoleRow = ({ role }: { role: any }) => {
 
 const AdminPage = () => {
     const roles = useQuery(api.roles.getRoles);
+    const users = useQuery(api.users.getUsers);
     
     const [q, setQ] = useState("");
-
-    const totalColaboradores = colaboradoresFixture.length;
 
     const promedioProgreso = useMemo(() => {
         if (colaboradoresFixture.length === 0) return 0;
@@ -49,8 +48,8 @@ const AdminPage = () => {
         return colaboradoresFixture.filter(c => new Date(c.ingreso) >= days30).length;
     }, []);
 
-    const colaboradoresFiltrados = colaboradoresFixture.filter(c =>
-        c.nombre.toLowerCase().includes(q.toLowerCase()) || c.puesto.toLowerCase().includes(q.toLowerCase())
+    const colaboradoresFiltrados = users?.filter(c =>
+        c.name.toLowerCase().includes(q.toLowerCase())
     );
 
     return (
@@ -68,7 +67,7 @@ const AdminPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <KpiCard title="Total Colaboradores" value={totalColaboradores} icon={<Users className="size-5"/>} />
+                <KpiCard title="Total Colaboradores" value={users?.length || 0} icon={<Users className="size-5"/>} />
 
                 {roles === undefined ? (
                     <div className="w-full flex items-center justify-center">
@@ -89,22 +88,21 @@ const AdminPage = () => {
                         <div className="w-64"><SearchInput value={q} onChange={setQ} placeholder="Buscar por nombre o puesto..." /></div>
                     </div>
 
-                    {colaboradoresFiltrados.length === 0 ? (
+                    {colaboradoresFiltrados?.length === 0 ? (
                         <EmptyState title="No hay colaboradores" description="No se encontraron colaboradores con esos criterios." cta={<Link href="/admin/colaboradores/nuevo" className="text-default-300">Crear colaborador</Link>} />
                     ) : (
                         <ul className="flex flex-col gap-3">
-                            {colaboradoresFiltrados.map(c => (
-                                <li key={c.id} className="flex items-center justify-between p-3 rounded-lg border border-neutral-200 dark:border-neutral-900/50 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors">
+                            {colaboradoresFiltrados?.map(user => (
+                                <li key={user._id} className="flex items-center justify-between p-3 rounded-lg border border-neutral-200 dark:border-neutral-900/50 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
                                     <div className="flex items-center gap-3">
-                                        <img src={c.avatar ?? ''} alt={c.nombre} className="size-10 rounded-xl object-cover border border-neutral-200" />
+                                        <img src={user.photo ?? ''} alt={user.name} className="size-10 rounded-xl object-cover border border-neutral-200" />
                                         <div className="flex flex-col">
-                                            <div className="font-semibold text-neutral-900 dark:text-neutral-200">{c.nombre}</div>
-                                            <div className="text-xs text-neutral-500 dark:text-neutral-400">{c.puesto} — {c.email}</div>
+                                            <div className="font-semibold text-neutral-900 dark:text-neutral-200">{user.name}</div>
+                                            <div className="text-xs text-neutral-500 dark:text-neutral-400">{user.email}</div>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-neutral-800 dark:text-neutral-200 text-sm font-bold">{c.progreso}%</div>
-                                        <Link href={`/admin/colaboradores/${c.id}`} className="text-sm text-default-300">Ver</Link>
+                                        <Link href={`/admin/colaboradores/${user._id}`} className="text-sm text-default-300">Ver</Link>
                                     </div>
                                 </li>
                             ))}
