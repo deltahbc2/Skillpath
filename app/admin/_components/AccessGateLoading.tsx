@@ -7,7 +7,7 @@ const AccessGateLoading = () => {
             <div className="absolute -left-20 top-10 size-56 rounded-full bg-[#30aa85]/12 blur-3xl" />
             <div className="absolute -right-16 bottom-0 size-64 rounded-full bg-[#009388]/10 blur-3xl" />
 
-            <div className="relative w-full max-w-lg rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-xl">
+            <div className="relative w-full max-w-lg rounded-4xl border border-white/70 bg-white/85 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-xl">
                 <div className="mb-6 flex items-center gap-3">
                     <div className="flex size-12 items-center justify-center rounded-2xl bg-[#30aa85]/12 text-[#009388] ring-1 ring-[#30aa85]/15">
                         <Sparkles className="size-6" />

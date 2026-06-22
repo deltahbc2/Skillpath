@@ -10,7 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 import EmptyState from "../../_components/EmptyState";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { generateRoadmapsForNewSkills } from "./generateRoadmap";
+import { generateRoadmapsForNewSkills } from "@/utils/generateRoadmap";
 import Link from "next/link";
 
 const puestoNombrePage = () => {
@@ -185,8 +185,8 @@ const puestoNombrePage = () => {
     };
 
     if(role === undefined || roles === undefined || role === null) return (
-        <div className="w-full flex items-center justify-center py-20">
-            <Spinner/>
+        <div className="w-full flex h-screen items-center justify-center py-20">
+            <Spinner className="size-12"/>
         </div>
     )
 
@@ -347,45 +347,45 @@ const puestoNombrePage = () => {
                     <>
                         <table className="w-full text-left border-collapse overflow-auto">
                             <thead>
-                                    <tr className="bg-neutral-50/80 border-b border-neutral-100">
-                                        <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Colaborador</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Puesto</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Contacto</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider w-48">Porcentaje</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-right">Acciones</th>
+                                <tr className="bg-neutral-50/80 dark:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-700">
+                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider">Colaborador</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider">Puesto</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider">Contacto</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider w-48">Porcentaje</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-neutral-500 dark:text-neutral-200 uppercase tracking-wider text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-50">
                                 {users?.map((user) => {
                                     return (
-                                        <tr key={user?._id} className="hover:bg-neutral-50/50 transition-colors group">
+                                        <tr key={user._id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-700 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
-                                                    <img src={user?.photo || "/user.png"} alt={user?.name || "Colaborador"} className="size-12 rounded-xl object-cover border border-neutral-200 shadow-sm group-hover:border-[#5cbb80]/20 transition-colors"/>
-                                                    <div className="font-semibold text-neutral-900 text-sm">{user?.name || "Sin nombre"}</div>
+                                                    <img src={user.photo || "/user.png"} alt={user.name} className="size-12 rounded-xl object-cover border border-neutral-200 shadow-sm group-hover:border-[#5cbb80]/20 transition-colors"/>
+                                                    <div className="font-semibold text-neutral-900 dark:text-neutral-300 text-md">{user.name}</div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-sm text-neutral-800 font-medium">{role?.name || "Sin puesto"}</div>
+                                                <div className="text-sm text-neutral-800 dark:text-neutral-300 font-medium">{role?.name || "Sin rol"}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-sm text-neutral-600">{user?.email || "Sin email"}</div>
-                                                <div className="text-xs text-neutral-400 mt-0.5">{user?.phone || "Sin teléfono"}</div>
+                                                <div className="text-sm text-neutral-600 dark:text-neutral-300">{user.email}</div>
+                                                <div className="text-xs text-neutral-400 mt-0.5">{user.phone}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-default-100 rounded-full w-0 relative"></div>
+                                                        <div className="h-full bg-default-100 rounded-full w-[92%] relative"></div>
                                                     </div>
-                                                    <span className="text-sm font-bold text-neutral-700 w-10 text-right">Sin dato</span>
+                                                    <span className="text-sm font-bold text-neutral-700 dark:text-neutral-300 w-10 text-right">92%</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-right min-w-35">
+                                            <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Link href={`/admin/colaboradores/${user?._id}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors">
-                                                        <Eye className="size-4 text-neutral-600" />
+                                                    <Link href={`/admin/colaboradores/${user?._id}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors  text-neutral-600 dark:text-neutral-300 hover:dark:text-neutral-700" title="Ver">
+                                                        <Eye className="size-4" />
                                                     </Link>
-                                                    <button className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Eliminar">
+                                                    <button onClick={() => {}} className="p-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" title="Eliminar">
                                                         <Trash2 className="size-4 text-red-500" />
                                                     </button>
                                                 </div>
@@ -396,7 +396,7 @@ const puestoNombrePage = () => {
                             </tbody>
                         </table>
                         
-                        <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50 flex items-center justify-between text-sm text-neutral-600">
+                        <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-300">
                             <span>Total: {users?.length || 0} colaboradores</span>
                         </div>
                     </>

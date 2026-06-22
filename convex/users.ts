@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
 export const createUser = mutation({
@@ -10,6 +11,7 @@ export const createUser = mutation({
         photo: v.optional(v.string()),
         role: v.id("roles"),
         cv: v.string(),
+        selectedSkills: v.array(v.string()),
         // admin: v.boolean(),
     },
     handler: async (ctx, args) => {
@@ -21,15 +23,14 @@ export const createUser = mutation({
                 .first()
             : null;
 
-        if (existingByClerkId) return existingByClerkId;
+        const user = existingByClerkId ?? null;
 
         const existingByEmail = await ctx.db.query("users")
             .filter(q => q.eq(q.field("email"), normalizedEmail))
             .first();
 
-        if (existingByEmail) return existingByEmail;
-
-        return await ctx.db.insert("users", {
+        const existingUser = user ?? existingByEmail ?? null;
+        const userId = existingUser?._id ?? await ctx.db.insert("users", {
             clerkUserId: args.clerkUserId,
             name: args.name,
             email: normalizedEmail,
@@ -39,6 +40,36 @@ export const createUser = mutation({
             cv: args.cv,
             admin: false,
         });
+
+        if (args.selectedSkills.length === 0) {
+            return userId;
+        }
+
+        const existingUserSkills = await ctx.db.query("userSkills")
+            .filter(q => q.eq(q.field("userId"), userId))
+            .collect();
+
+        const existingSkillIds = new Set(existingUserSkills.map((userSkill) => userSkill.skillId));
+        const skills = await ctx.db.query("skills").collect();
+        const skillsByName = new Map(
+            skills.map((skill) => [skill.name.trim().toLowerCase(), skill._id] as const)
+        );
+
+        const skillsToInsert = args.selectedSkills
+            .map((skillName) => skillsByName.get(skillName.trim().toLowerCase()))
+            .filter((skillId): skillId is Id<"skills"> => skillId !== undefined)
+            .filter((skillId) => !existingSkillIds.has(skillId));
+
+        await Promise.all(
+            skillsToInsert.map((skillId) =>
+                ctx.db.insert("userSkills", {
+                    userId,
+                    skillId,
+                })
+            )
+        );
+
+        return userId;
     },
 });
 

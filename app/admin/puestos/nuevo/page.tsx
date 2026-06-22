@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { parseRoadmapData } from "./parseRoadmap";
+import { parseRoadmapData } from "@/utils/parseRoadmap";
 
 import Spinner from "@/components/Spinner";
 import { Search } from "lucide-react";

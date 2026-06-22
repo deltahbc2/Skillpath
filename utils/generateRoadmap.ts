@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import type { Id } from "@/convex/_generated/dataModel";
-import { parseRoadmapData } from "../nuevo/parseRoadmap";
+import { parseRoadmapData } from "@/utils/parseRoadmap";
 
 type CreateLessonMutation = (args: {
     roleId: Id<"roles">;
