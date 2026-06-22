@@ -55,3 +55,16 @@ export const getSkillsByNames = query({
         return skills.filter((skill) => normalizedNames.has(skill.name.toLowerCase()));
     },
 });
+
+export const getSkillsByUserId = query({
+    args: {
+        userId: v.id("users")
+    },
+    handler: async (ctx, args) => {
+        const skills = await ctx.db.query("userSkills")
+            .filter((q: any) => q.eq(q.field("userId"), args.userId))
+            .collect();
+        
+        return skills;
+    }
+});

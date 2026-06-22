@@ -12,12 +12,17 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { generateRoadmapsForNewSkills } from "@/utils/generateRoadmap";
 import Link from "next/link";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 const puestoNombrePage = () => {
     const params = useParams();
     const router = useRouter();
     const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
     const id = typeof rawId === "string" ? (rawId as Id<"roles">) : undefined;
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<any | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const [isEditing, setIsEditing] = useState(false)
     const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
@@ -44,8 +49,41 @@ const puestoNombrePage = () => {
             : "skip"
     );
 
+    const userSkills = useQuery(api.skills.getSkillsByUserId, users?.[0]?._id ? { userId: users?.[0]?._id } : "skip");
+
     const updateRole = useMutation(api.roles.updateRoleById);
     const createLesson = useMutation(api.lessons.createLesson);
+    const removeUser = useMutation(api.users.deleteUserById);
+
+    const requestDelete = (user: any) => {
+        setUserToDelete(user);
+        setModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!userToDelete) return;
+        setIsDeleting(true);
+
+        const promise = removeUser({ userId: userToDelete._id });
+        toast.promise(promise, {
+            loading: "Eliminando usuario...",
+            success: "Usuario eliminado",
+            error: "Error al eliminar el usuario",
+        });
+
+        try {
+            await promise;
+        } finally {
+            setIsDeleting(false);
+            setModalOpen(false);
+            setUserToDelete(null);
+        }
+    };
+    
+    const cancelDelete = () => {
+        setModalOpen(false);
+        setUserToDelete(null);
+    };
 
     useEffect(() => {
         if (!isEditing && role) {
@@ -86,7 +124,7 @@ const puestoNombrePage = () => {
 
     const onRemoveSkill = (skillToRemove: string) => {
         setEditedSkills((prev) => prev.filter((skill) => skill !== skillToRemove));
-    };
+    };    
 
     const validateForm = () => {
         if (!editedName.trim()) {
@@ -374,10 +412,17 @@ const puestoNombrePage = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-default-100 rounded-full w-[92%] relative"></div>
-                                                    </div>
-                                                    <span className="text-sm font-bold text-neutral-700 dark:text-neutral-300 w-10 text-right">92%</span>
+                                                    {userSkills && skills ? (
+                                                        <>
+                                                            <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
+                                                                <div className={`h-full bg-default-100 rounded-full ${userSkills && skills ? `w-[${(userSkills.length / skills.length) * 100}%]` : 'w-0'} relative`}></div>
+                                                            </div>
+
+                                                            <span className="text-sm font-bold text-neutral-700 dark:text-neutral-300 w-10 text-right">{(userSkills.length / skills.length * 100) || 0}%</span>
+                                                        </>
+                                                    ): (
+                                                        <Spinner className="size-4 text-neutral-400" />
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
@@ -385,7 +430,7 @@ const puestoNombrePage = () => {
                                                     <Link href={`/admin/colaboradores/${user?._id}`} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors  text-neutral-600 dark:text-neutral-300 hover:dark:text-neutral-700" title="Ver">
                                                         <Eye className="size-4" />
                                                     </Link>
-                                                    <button onClick={() => {}} className="p-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" title="Eliminar">
+                                                    <button onClick={() => requestDelete(user)} className="p-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" title="Eliminar">
                                                         <Trash2 className="size-4 text-red-500" />
                                                     </button>
                                                 </div>
@@ -402,6 +447,16 @@ const puestoNombrePage = () => {
                     </>
                 )}
             </div>
+            <ConfirmationModal
+                open={modalOpen}
+                title={`Eliminar colaborador`}
+                message={`Vas a eliminar a "${userToDelete?.name || "este colaborador"}" y sus datos asociados. ¿Deseas continuar?`}
+                confirmLabel="Eliminar"
+                cancelLabel="Cancelar"
+                loading={isDeleting}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+            />
         </section>
     );
 }
