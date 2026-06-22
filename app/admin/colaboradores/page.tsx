@@ -13,6 +13,8 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 
 const UserRow = ({ user, onDelete }: { user: any; onDelete: (user: any) => void }) => {
     const role = useQuery(api.roles.getRoleById, { id: user.role });
+    const userSkills = useQuery(api.skills.getSkillsByUserId, { userId: user._id });
+    const skills = useQuery(api.skills.getSkillsByRoleId, role ? { roleId: role._id } : "skip");
 
     return (
         <tr className="hover:bg-neutral-50/50 dark:hover:bg-neutral-700 transition-colors group">
@@ -31,10 +33,17 @@ const UserRow = ({ user, onDelete }: { user: any; onDelete: (user: any) => void 
             </td>
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-default-100 rounded-full w-[92%] relative"></div>
-                    </div>
-                    <span className="text-sm font-bold text-neutral-700 dark:text-neutral-300 w-10 text-right">92%</span>
+                    {userSkills && skills ? (
+                        <>
+                            <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
+                                <div className={`h-full bg-default-100 rounded-full ${userSkills && skills ? `w-[${(userSkills.length / skills.length) * 100}%]` : 'w-0'} relative`}></div>
+                            </div>
+
+                            <span className="text-sm font-bold text-neutral-700 dark:text-neutral-300 w-10 text-right">{(userSkills.length / skills.length * 100) || 0}%</span>
+                        </>
+                    ): (
+                        <Spinner className="size-4 text-neutral-400" />
+                    )}
                 </div>
             </td>
             <td className="px-6 py-4 text-right">
